@@ -1,0 +1,22 @@
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #mirai-a4-print-root,
+  #mirai-a4-print-root * {
+    visibility: visible;
+  }
+
+  #mirai-a4-print-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 20mm;
+    box-shadow: none;
+    transform: none !important;
+  }
+}

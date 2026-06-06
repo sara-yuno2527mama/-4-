@@ -22,10 +22,27 @@
     {
       "id": "soumu",
       "name": "総務",
+      "schedulePhases": [
+        {
+          "id": "soumu-mid",
+          "label": "18～20日ごろ",
+          "start": "2026-05-18",
+          "end": "2026-05-20"
+        },
+        {
+          "id": "soumu-eom",
+          "label": "月末～締め日",
+          "start": "2026-06-01",
+          "end": "2026-06-03"
+        }
+      ],
       "tracks": [
-        { "id": "soumu-etc", "name": "ETC・車両", "openCount": 1 },
-        { "id": "soumu-supplies", "name": "庶務・備品", "openCount": 1 },
-        { "id": "soumu-travel", "name": "出張手配", "openCount": 0 }
+        { "id": "soumu-etc-shinden", "name": "ETC新電源", "openCount": 0 },
+        { "id": "soumu-etc-world", "name": "ETCワールド", "openCount": 0 },
+        { "id": "soumu-jtb", "name": "JTB", "openCount": 0 },
+        { "id": "soumu-nishitetsu", "name": "西鉄ホテルズ", "openCount": 0 },
+        { "id": "soumu-uniform", "name": "制服", "openCount": 0 },
+        { "id": "soumu-attendance", "name": "勤怠", "openCount": 0 }
       ]
     },
     {
@@ -120,27 +137,177 @@
     {
       "id": "private",
       "name": "プライベート",
-      "tracks": []
+      "tracks": [
+        { "id": "private-pottery", "name": "陶芸関係", "openCount": 0 },
+        { "id": "private-nursery", "name": "保育園関係", "openCount": 0 },
+        { "id": "private-me-time", "name": "自分時間", "openCount": 0 }
+      ]
     }
   ],
   "tasks": [
     {
-      "id": "t-soumu-1",
-      "title": "ETC利用明細：今月分の突合",
-      "trackId": "soumu-etc",
-      "status": "doing",
-      "dueDate": "2026-05-10",
+      "id": "t-shinden-1",
+      "title": "フォルダ分け + 社内メール送信",
+      "trackId": "soumu-etc-shinden",
+      "closingTimingId": "soumu-mid",
+      "status": "done",
+      "dueDate": "2026-05-20",
       "owner": "事務局（ペア）",
-      "summary": "カード明細と申請メモを照合し、不明分は主担当にエスカレーション。"
+      "summary": "【18～20日ごろ】請求書到着後。データ到着：請求書到着後すぐ。"
     },
     {
-      "id": "t-soumu-2",
-      "title": "備品発注：トナー在庫の確認",
-      "trackId": "soumu-supplies",
+      "id": "t-shinden-2",
+      "title": "ビルワン登録",
+      "trackId": "soumu-etc-shinden",
+      "closingTimingId": "soumu-eom",
       "status": "todo",
-      "dueDate": "2026-05-17",
+      "dueDate": "2026-06-01",
       "owner": "事務局（ペア）",
-      "summary": "在庫表を更新し、発注が必要なら事務局長承認のうえ発注する。"
+      "summary": "【月末～締め日】データ到着：月末データ到着翌日から着手。"
+    },
+    {
+      "id": "t-shinden-3",
+      "title": "エクセル表作成・格納",
+      "trackId": "soumu-etc-shinden",
+      "closingTimingId": "soumu-eom",
+      "status": "todo",
+      "dueDate": "2026-06-01",
+      "owner": "事務局（ペア）",
+      "summary": "【月末～締め日】"
+    },
+    {
+      "id": "t-shinden-4",
+      "title": "ビルワン按分入力",
+      "trackId": "soumu-etc-shinden",
+      "closingTimingId": "soumu-eom",
+      "status": "todo",
+      "dueDate": "2026-06-01",
+      "owner": "事務局（ペア）",
+      "summary": "【月末～締め日】"
+    },
+    {
+      "id": "t-shinden-5",
+      "title": "片道通勤分（使用者名追記+ビルワン）",
+      "trackId": "soumu-etc-shinden",
+      "closingTimingId": "soumu-eom",
+      "status": "todo",
+      "dueDate": "2026-06-02",
+      "owner": "事務局（ペア）",
+      "summary": "【月末～締め日】改訂版で追記した工程。"
+    },
+    {
+      "id": "t-world-1",
+      "title": "CSV + ビルワン入力 + 格納",
+      "trackId": "soumu-etc-world",
+      "closingTimingId": "soumu-eom",
+      "status": "todo",
+      "dueDate": "2026-06-02",
+      "owner": "事務局（ペア）",
+      "summary": "【月末～締め日】"
+    },
+    {
+      "id": "t-jtb-1",
+      "title": "ビルワン登録 + 按分入力",
+      "trackId": "soumu-jtb",
+      "closingTimingId": "soumu-eom",
+      "status": "todo",
+      "dueDate": "2026-06-02",
+      "owner": "事務局（ペア）",
+      "summary": "【月末～締め日】"
+    },
+    {
+      "id": "t-nishitetsu-1",
+      "title": "按分入力",
+      "trackId": "soumu-nishitetsu",
+      "closingTimingId": "soumu-eom",
+      "status": "todo",
+      "dueDate": "2026-06-02",
+      "owner": "事務局（ペア）",
+      "summary": "【月末～締め日】"
+    },
+    {
+      "id": "t-uniform-1",
+      "title": "会社支給：ビルワン登録 + 按分入力",
+      "trackId": "soumu-uniform",
+      "closingTimingId": "soumu-eom",
+      "status": "todo",
+      "dueDate": "2026-06-03",
+      "owner": "事務局（ペア）",
+      "summary": "【月末～締め日】締め日の2～3日前までに完了目標。"
+    },
+    {
+      "id": "t-uniform-2",
+      "title": "個人購入：書類作成→回覧→人事提出",
+      "trackId": "soumu-uniform",
+      "closingTimingId": "soumu-eom",
+      "status": "todo",
+      "dueDate": "2026-06-03",
+      "owner": "事務局（ペア）",
+      "summary": "【月末～締め日】"
+    },
+    {
+      "id": "t-attendance-1",
+      "title": "締め入力",
+      "trackId": "soumu-attendance",
+      "closingTimingId": "soumu-eom",
+      "status": "todo",
+      "dueDate": "2026-06-03",
+      "owner": "事務局（ペア）",
+      "summary": "【月末～締め日】月末処理 純作業時間 合計 約5時間（改訂版）。"
+    },
+    {
+      "id": "t-pottery-1",
+      "title": "ホームページ作成",
+      "trackId": "private-pottery",
+      "status": "doing",
+      "dueDate": "2026-06-30",
+      "owner": "本人",
+      "summary": "陶芸作品の紹介・注文導線を整える。"
+    },
+    {
+      "id": "t-pottery-2",
+      "title": "注文管理",
+      "trackId": "private-pottery",
+      "status": "todo",
+      "dueDate": "2026-06-30",
+      "owner": "本人",
+      "summary": "受注〜発送までの流れを一覧化する。"
+    },
+    {
+      "id": "t-pottery-3",
+      "title": "経理業務",
+      "trackId": "private-pottery",
+      "status": "todo",
+      "dueDate": "2026-06-30",
+      "owner": "本人",
+      "summary": "売上・経費の記録ルールを決める。"
+    },
+    {
+      "id": "t-nursery-1",
+      "title": "お弁当の日スケジュール",
+      "trackId": "private-nursery",
+      "status": "todo",
+      "dueDate": "2026-05-26",
+      "owner": "本人",
+      "summary": "保育園のお弁当日をカレンダーに反映する。"
+    },
+    {
+      "id": "t-nursery-2",
+      "title": "お弁当メニュー候補",
+      "trackId": "private-nursery",
+      "status": "todo",
+      "dueDate": "2026-05-26",
+      "owner": "本人",
+      "summary": "定番メニューとローテーション案をストックする。"
+    },
+    {
+      "id": "t-me-1",
+      "title": "個人休みにしたいことリスト",
+      "trackId": "private-me-time",
+      "status": "todo",
+      "dueDate": "2026-06-15",
+      "owner": "本人",
+      "summary": "有紀リフレッシュ・家庭・ブランド以外の「自分の時間」用メモ。"
     },
     {
       "id": "t-join-1",

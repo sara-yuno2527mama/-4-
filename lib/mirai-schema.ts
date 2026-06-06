@@ -53,6 +53,8 @@ export const miraiTaskSchema = z.object({
   dueDate: z.string(),
   owner: z.string(),
   summary: z.string(),
+  /** 総務の月次締め：`schedulePhases` の id（例 soumu-mid / soumu-eom） */
+  closingTimingId: z.string().optional(),
   checklists: z.array(miraiChecklistItemSchema).optional(),
 });
 export type MiraiTask = z.infer<typeof miraiTaskSchema>;

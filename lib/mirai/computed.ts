@@ -50,6 +50,28 @@ export function taskGroupsForDomain(
   }));
 }
 
+export type MiraiClosingTimingGroup = {
+  phase: MiraiSchedulePhase;
+  tasks: MiraiTask[];
+};
+
+/** 総務：選択トラックの締め作業をタイミング（schedulePhases）でグループ化 */
+export function taskGroupsByClosingTiming(
+  dashboard: MiraiDashboard,
+  domain: MiraiDomain,
+  selectedTrackId: string,
+): MiraiClosingTimingGroup[] {
+  const phases = domain.schedulePhases ?? [];
+  const trackTasks = dashboard.tasks
+    .filter((t) => t.trackId === selectedTrackId)
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+
+  return phases.map((phase) => ({
+    phase,
+    tasks: trackTasks.filter((t) => t.closingTimingId === phase.id),
+  }));
+}
+
 function parseDateOnly(iso: string): number {
   const [y, m, d] = iso.split("-").map(Number);
   return Date.UTC(y, m - 1, d);

@@ -7,19 +7,21 @@ type MiraiSchedulePhaseStripProps = {
   phases: MiraiSchedulePhase[];
   currentPhaseId: string | null;
   asOfDate: string;
+  title?: string;
 };
 
 export function MiraiSchedulePhaseStrip({
   phases,
   currentPhaseId,
   asOfDate,
+  title = "年間スケジュール",
 }: MiraiSchedulePhaseStripProps) {
   const current = phases.find((p) => p.id === currentPhaseId);
 
   return (
     <div className="flex flex-col gap-2 border-b border-border px-3 py-3">
       <div className="flex flex-col gap-0.5">
-        <p className="text-xs font-medium text-foreground">年間スケジュール</p>
+        <p className="text-xs font-medium text-foreground">{title}</p>
         <p className="text-xs text-muted-foreground">
           基準日 {asOfDate}
           {current ? (

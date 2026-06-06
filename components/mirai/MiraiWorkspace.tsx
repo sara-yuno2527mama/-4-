@@ -10,7 +10,10 @@ import {
   shidaiGroupsForWindow,
   yearMonthLabel,
 } from "@/lib/mirai/committee";
-import { MIRAI_COMMITTEE_DOMAIN_ID } from "@/lib/mirai/constants";
+import {
+  MIRAI_COMMITTEE_DOMAIN_ID,
+  MIRAI_SOUMU_DOMAIN_ID,
+} from "@/lib/mirai/constants";
 import { miraiPanesRowClassName } from "@/lib/mirai/layout";
 import {
   currentSchedulePhase,
@@ -18,6 +21,7 @@ import {
   findTrack,
   initialMiraiSelection,
   resolveAsOfDate,
+  taskGroupsByClosingTiming,
   taskGroupsForDomain,
 } from "@/lib/mirai/computed";
 import { MiraiDomainPane } from "@/components/mirai/MiraiDomainPane";
@@ -62,6 +66,7 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
   const [selectedShidaiId, setSelectedShidaiId] = useState<string | null>(null);
 
   const isCommitteeMode = selectedDomainId === MIRAI_COMMITTEE_DOMAIN_ID;
+  const isSoumuMode = selectedDomainId === MIRAI_SOUMU_DOMAIN_ID;
   const shidaiRecords = initialDashboard.shidaiRecords ?? [];
   const shidaiDrafts = initialDashboard.shidaiDrafts ?? [];
   const annualMonths = initialDashboard.annualMonths ?? [];
@@ -79,6 +84,15 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
     () => taskGroupsForDomain(initialDashboard, selectedDomainId),
     [initialDashboard, selectedDomainId],
   );
+
+  const closingTimingGroups = useMemo(() => {
+    if (!isSoumuMode || !selectedDomain) return null;
+    return taskGroupsByClosingTiming(
+      initialDashboard,
+      selectedDomain,
+      selectedTrackId,
+    );
+  }, [initialDashboard, isSoumuMode, selectedDomain, selectedTrackId]);
 
   const priorYearWindow = useMemo(
     () => priorYearMonthWindow(selectedAnnualMonthId),
@@ -236,10 +250,15 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
             <MiraiTaskListPane
               domainId={selectedDomainId}
               domainName={selectedDomain?.name ?? ""}
+              trackName={selectedTrack?.name ?? ""}
               schedulePhases={selectedDomain?.schedulePhases}
+              scheduleStripTitle={
+                isSoumuMode ? "月次締めスケジュール" : "年間スケジュール"
+              }
               currentPhaseId={currentPhase?.id ?? null}
               asOfDate={asOfDate}
               groups={taskGroups}
+              closingTimingGroups={closingTimingGroups}
               selectedTaskId={selectedTaskId}
               onSelectTask={selectTask}
             />

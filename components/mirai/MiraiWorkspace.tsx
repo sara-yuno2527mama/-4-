@@ -24,7 +24,16 @@ import {
   taskGroupsByClosingTiming,
   taskGroupsForDomain,
 } from "@/lib/mirai/computed";
+import { useMiraiRoster, miraiRosterActions } from "@/hooks/use-mirai-roster";
+import {
+  businessMonthPeriod,
+  currentBusinessMonthId,
+} from "@/lib/mirai/business-month";
+import { crossCutSnapshot } from "@/lib/mirai/crosscut";
 import { MiraiDomainPane } from "@/components/mirai/MiraiDomainPane";
+import { MiraiCrossCutBand } from "@/components/mirai/MiraiCrossCutBand";
+import { MiraiQuickInputSection } from "@/components/mirai/MiraiQuickInputSection";
+import { MiraiMonthMemoSection } from "@/components/mirai/MiraiMonthMemoSection";
 import { MiraiTaskListPane } from "@/components/mirai/MiraiTaskListPane";
 import { MiraiTaskDetailPane } from "@/components/mirai/MiraiTaskDetailPane";
 import { MiraiTaskChecklistPane } from "@/components/mirai/MiraiTaskChecklistPane";
@@ -70,6 +79,26 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
   const shidaiRecords = initialDashboard.shidaiRecords ?? [];
   const shidaiDrafts = initialDashboard.shidaiDrafts ?? [];
   const annualMonths = initialDashboard.annualMonths ?? [];
+
+  // 横断スケジュール（Phase 1）：すぐ入力の永続化状態と横断スナップショット
+  const roster = useMiraiRoster();
+  const crossCut = useMemo(
+    () => crossCutSnapshot(initialDashboard, asOfDate, roster),
+    [initialDashboard, asOfDate, roster],
+  );
+  const businessMonthId = useMemo(
+    () =>
+      currentBusinessMonthId(
+        roster.businessMonths,
+        (initialDashboard.annualMonths ?? []).map((m) => m.id),
+        asOfDate,
+      ),
+    [roster.businessMonths, initialDashboard.annualMonths, asOfDate],
+  );
+  const businessMonthCloseDate = businessMonthPeriod(
+    roster.businessMonths,
+    businessMonthId,
+  ).closeDate;
 
   const selectedDomain = initialDashboard.domains.find(
     (d) => d.id === selectedDomainId,
@@ -206,6 +235,23 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
         tasks={initialDashboard.tasks}
         selectedTrackId={selectedTrackId}
         onSelectTrack={selectTrack}
+        topSlot={
+          <>
+            <MiraiQuickInputSection
+              roster={roster}
+              actions={miraiRosterActions}
+              annualMonths={annualMonths}
+              currentBusinessMonthId={businessMonthId}
+            />
+            <MiraiMonthMemoSection
+              roster={roster}
+              businessMonthId={businessMonthId}
+              closeDate={businessMonthCloseDate}
+              asOfDate={asOfDate}
+              actions={miraiRosterActions}
+            />
+          </>
+        }
       />
 
       <SidebarInset className="flex min-w-0 flex-col bg-background">
@@ -233,6 +279,8 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
+
+        <MiraiCrossCutBand snapshot={crossCut} />
 
         <div className={miraiPanesRowClassName}>
           {isCommitteeMode && annualMonths.length > 0 ? (

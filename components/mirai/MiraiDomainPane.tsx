@@ -1,5 +1,7 @@
 "use client";
 
+import { type ReactNode } from "react";
+
 import {
   type MiraiDashboard,
   type MiraiDomain,
@@ -24,6 +26,8 @@ type MiraiDomainPaneProps = {
   tasks: MiraiDashboard["tasks"];
   selectedTrackId: string;
   onSelectTrack: (domainId: string, trackId: string) => void;
+  /** ドメインナビの上に差し込むコンテンツ（すぐ入力・当月メモ。§5） */
+  topSlot?: ReactNode;
 };
 
 export function MiraiDomainPane({
@@ -32,6 +36,7 @@ export function MiraiDomainPane({
   tasks,
   selectedTrackId,
   onSelectTrack,
+  topSlot,
 }: MiraiDomainPaneProps) {
   return (
     <Sidebar
@@ -48,6 +53,7 @@ export function MiraiDomainPane({
       </SidebarHeader>
 
       <SidebarContent className="px-1 py-3 group-data-[collapsible=icon]:hidden">
+        {topSlot}
         {domains.map((domain) => (
           <SidebarGroup key={domain.id} className="px-1">
             <SidebarGroupLabel className="px-2 text-xs font-semibold tracking-wide text-sidebar-foreground/70 uppercase">

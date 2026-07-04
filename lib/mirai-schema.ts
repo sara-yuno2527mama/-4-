@@ -351,6 +351,8 @@ export const miraiDashboardSchema = z.object({
   businessMonths: z.array(miraiBusinessMonthSchema).optional(),
   monthlyRosters: z.array(miraiMonthlyRosterSchema).optional(),
   workDaySettings: miraiWorkDaySettingsSchema.optional(),
+  /** 番組表の予定/実績ブロック seed（§8.2。編集・タイマーは Phase 3） */
+  dailyBlocks: z.array(miraiDailyBlockSchema).optional(),
   committeeMeetings: z.array(miraiCommitteeMeetingSchema).optional(),
   showcaseEvent: miraiShowcaseEventSchema.optional(),
   joinMilestones: z.array(miraiJoinMilestoneSchema).optional(),

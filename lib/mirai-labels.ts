@@ -1,5 +1,6 @@
 import {
   type MiraiCommitteeMeetingKind,
+  type MiraiDutyBlockKind,
   type MiraiHolidayKind,
   type MiraiShidaiKind,
   type MiraiTaskStatus,
@@ -35,3 +36,14 @@ export const MIRAI_HOLIDAY_KIND_LABELS: Record<MiraiHolidayKind, string> = {
   full: "有休",
   holiday: "休日",
 };
+
+/** 当番ブロックの種別ラベル（§6.1 / §13 dutyBlock） */
+export const MIRAI_DUTY_BLOCK_KIND_LABELS: Record<MiraiDutyBlockKind, string> =
+  {
+    "lunch-phone": "昼当番（電話番）",
+    "lunch-break": "昼休み",
+    "mail-am": "郵便仕分け（朝）",
+    "mail-noon": "郵便仕分け（昼）",
+    "regular-pm": "定期便仕分け",
+    bento: "お弁当",
+  };

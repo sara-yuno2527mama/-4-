@@ -11,9 +11,11 @@
 import { useSyncExternalStore } from "react";
 
 import {
+  type MiraiColumnId,
   type MiraiCommitteeMeetingKind,
   type MiraiHolidayKind,
 } from "@/lib/mirai-schema";
+import { MIRAI_DEFAULT_VISIBLE_COLUMNS } from "@/lib/mirai/columns";
 import {
   MIRAI_ROSTER_DEFAULT,
   MIRAI_ROSTER_STORAGE_KEY,
@@ -30,7 +32,9 @@ let storageBound = false;
 
 function load(): MiraiRosterState {
   if (typeof window === "undefined") return MIRAI_ROSTER_DEFAULT;
-  return parseRosterState(window.localStorage.getItem(MIRAI_ROSTER_STORAGE_KEY));
+  return parseRosterState(
+    window.localStorage.getItem(MIRAI_ROSTER_STORAGE_KEY),
+  );
 }
 
 function getSnapshot(): MiraiRosterState {
@@ -66,7 +70,10 @@ function commit(next: MiraiRosterState): void {
   cache = next;
   if (typeof window !== "undefined") {
     try {
-      window.localStorage.setItem(MIRAI_ROSTER_STORAGE_KEY, JSON.stringify(next));
+      window.localStorage.setItem(
+        MIRAI_ROSTER_STORAGE_KEY,
+        JSON.stringify(next),
+      );
     } catch {
       // localStorage 不可（プライベートモード等）でもメモリ上は反映する
     }
@@ -123,7 +130,10 @@ export const miraiRosterActions = {
           ? state.businessMonths.map((b) =>
               b.id === businessMonthId ? { ...b, billingCloseDate } : b,
             )
-          : [...state.businessMonths, { id: businessMonthId, billingCloseDate }],
+          : [
+              ...state.businessMonths,
+              { id: businessMonthId, billingCloseDate },
+            ],
       };
     });
   },
@@ -240,6 +250,27 @@ export const miraiRosterActions = {
     );
   },
 
+  /**
+   * 番組表の半休トグル（§8.3）。その日の AM/PM 休みだけを差し替える
+   * （全休・祝日など他の休みには触れない）。half=null で半休なしに戻す。
+   */
+  setDayHalf(date: string, half: "am" | "pm" | null): void {
+    if (!date) return;
+    update((state) =>
+      upsertRoster(state, yearMonthOf(date), (r) => {
+        const withoutHalf = r.holidays.filter(
+          (h) => !(h.start === date && (h.kind === "am" || h.kind === "pm")),
+        );
+        const holidays = half
+          ? [...withoutHalf, { start: date, kind: half }].sort((a, b) =>
+              a.start.localeCompare(b.start),
+            )
+          : withoutHalf;
+        return { ...r, holidays };
+      }),
+    );
+  },
+
   addCommitteeMeeting(
     kind: MiraiCommitteeMeetingKind,
     heldOn: string,
@@ -263,6 +294,23 @@ export const miraiRosterActions = {
     update((state) => ({
       ...state,
       committeeMeetings: state.committeeMeetings.filter((m) => m.id !== id),
+    }));
+  },
+
+  /** 番組表の表示列を 1 つ ON/OFF する（列ピッカー。§3.3） */
+  toggleColumn(columnId: MiraiColumnId): void {
+    update((state) => ({
+      ...state,
+      visibleColumns: state.visibleColumns.includes(columnId)
+        ? state.visibleColumns.filter((c) => c !== columnId)
+        : [...state.visibleColumns, columnId],
+    }));
+  },
+  /** 表示列を初回表示（デフォルト ON）に戻す */
+  resetColumns(): void {
+    update((state) => ({
+      ...state,
+      visibleColumns: [...MIRAI_DEFAULT_VISIBLE_COLUMNS],
     }));
   },
 };

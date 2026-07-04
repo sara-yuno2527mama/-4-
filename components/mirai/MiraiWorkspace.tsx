@@ -30,8 +30,10 @@ import {
   currentBusinessMonthId,
 } from "@/lib/mirai/business-month";
 import { crossCutSnapshot } from "@/lib/mirai/crosscut";
+import { MIRAI_DEFAULT_WORK_DAY } from "@/lib/mirai/program";
 import { MiraiDomainPane } from "@/components/mirai/MiraiDomainPane";
 import { MiraiCrossCutBand } from "@/components/mirai/MiraiCrossCutBand";
+import { MiraiProgramTablePane } from "@/components/mirai/MiraiProgramTablePane";
 import { MiraiQuickInputSection } from "@/components/mirai/MiraiQuickInputSection";
 import { MiraiMonthMemoSection } from "@/components/mirai/MiraiMonthMemoSection";
 import { MiraiTaskListPane } from "@/components/mirai/MiraiTaskListPane";
@@ -48,7 +50,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
+type MiraiMainView = "domains" | "program";
 
 type MiraiWorkspaceProps = {
   initialDashboard: MiraiDashboard;
@@ -69,10 +74,14 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
     initial.taskId,
   );
-  const [selectedAnnualMonthId, setSelectedAnnualMonthId] = useState(
-    defaultAnnualMonthId,
-  );
+  const [selectedAnnualMonthId, setSelectedAnnualMonthId] =
+    useState(defaultAnnualMonthId);
   const [selectedShidaiId, setSelectedShidaiId] = useState<string | null>(null);
+  const [mainView, setMainView] = useState<MiraiMainView>("domains");
+
+  const workDaySettings =
+    initialDashboard.workDaySettings ?? MIRAI_DEFAULT_WORK_DAY;
+  const dailyBlocks = initialDashboard.dailyBlocks ?? [];
 
   const isCommitteeMode = selectedDomainId === MIRAI_COMMITTEE_DOMAIN_ID;
   const isSoumuMode = selectedDomainId === MIRAI_SOUMU_DOMAIN_ID;
@@ -145,12 +154,12 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
     [shidaiDrafts, selectedAnnualMonthId],
   );
 
-  const [workingDraft, setWorkingDraft] = useState<MiraiShidaiDraft | null>(null);
+  const [workingDraft, setWorkingDraft] = useState<MiraiShidaiDraft | null>(
+    null,
+  );
 
   useEffect(() => {
-    setWorkingDraft(
-      monthDraftFromJson ? { ...monthDraftFromJson } : null,
-    );
+    setWorkingDraft(monthDraftFromJson ? { ...monthDraftFromJson } : null);
   }, [selectedAnnualMonthId, monthDraftFromJson]);
 
   const monthDraft = workingDraft;
@@ -278,72 +287,105 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+
+          <div
+            className="flex shrink-0 items-center gap-1"
+            role="group"
+            aria-label="表示の切替"
+          >
+            <Button
+              size="sm"
+              variant={mainView === "domains" ? "secondary" : "ghost"}
+              aria-pressed={mainView === "domains"}
+              onClick={() => setMainView("domains")}
+            >
+              領域
+            </Button>
+            <Button
+              size="sm"
+              variant={mainView === "program" ? "secondary" : "ghost"}
+              aria-pressed={mainView === "program"}
+              onClick={() => setMainView("program")}
+            >
+              番組表
+            </Button>
+          </div>
         </header>
 
         <MiraiCrossCutBand snapshot={crossCut} />
 
-        <div className={miraiPanesRowClassName}>
-          {isCommitteeMode && annualMonths.length > 0 ? (
-            <MiraiCommitteeShidaiPane
-              domainName={selectedDomain?.name ?? ""}
-              annualMonths={annualMonths}
-              selectedMonthId={selectedAnnualMonthId}
-              onSelectMonth={selectAnnualMonth}
-              windowSubtitle={windowSubtitle}
-              groups={shidaiGroups}
-              selectedShidaiId={selectedShidaiId}
-              onSelectShidai={selectShidai}
-            />
-          ) : (
-            <MiraiTaskListPane
-              domainId={selectedDomainId}
-              domainName={selectedDomain?.name ?? ""}
-              trackName={selectedTrack?.name ?? ""}
-              schedulePhases={selectedDomain?.schedulePhases}
-              scheduleStripTitle={
-                isSoumuMode ? "月次締めスケジュール" : "年間スケジュール"
-              }
-              currentPhaseId={currentPhase?.id ?? null}
-              asOfDate={asOfDate}
-              groups={taskGroups}
-              closingTimingGroups={closingTimingGroups}
-              selectedTaskId={selectedTaskId}
-              onSelectTask={selectTask}
-            />
-          )}
-
-          {isCommitteeMode ? (
-            <>
-              <MiraiCommitteeDraftPane
-                selectedMonthLabel={selectedAnnualMonth?.label ?? ""}
-                priorYearGroups={shidaiGroups}
-                currentYearPrior={currentYearPrior}
-                draft={monthDraft}
-                focusedRecord={selectedShidai}
-                onFocusRecord={selectShidai}
+        {mainView === "program" ? (
+          <MiraiProgramTablePane
+            roster={roster}
+            actions={miraiRosterActions}
+            settings={workDaySettings}
+            dailyBlocks={dailyBlocks}
+            asOfDate={asOfDate}
+          />
+        ) : (
+          <div className={miraiPanesRowClassName}>
+            {isCommitteeMode && annualMonths.length > 0 ? (
+              <MiraiCommitteeShidaiPane
+                domainName={selectedDomain?.name ?? ""}
+                annualMonths={annualMonths}
+                selectedMonthId={selectedAnnualMonthId}
+                onSelectMonth={selectAnnualMonth}
+                windowSubtitle={windowSubtitle}
+                groups={shidaiGroups}
+                selectedShidaiId={selectedShidaiId}
+                onSelectShidai={selectShidai}
               />
-              <MiraiShidaiDocumentPane
-                monthLabel={selectedAnnualMonth?.label ?? ""}
-                draft={monthDraft}
-                record={selectedShidai}
-                onUpdateDraft={setWorkingDraft}
-              />
-            </>
-          ) : (
-            <>
-              <MiraiTaskDetailPane
-                task={selectedTask}
+            ) : (
+              <MiraiTaskListPane
+                domainId={selectedDomainId}
                 domainName={selectedDomain?.name ?? ""}
                 trackName={selectedTrack?.name ?? ""}
+                schedulePhases={selectedDomain?.schedulePhases}
+                scheduleStripTitle={
+                  isSoumuMode ? "月次締めスケジュール" : "年間スケジュール"
+                }
+                currentPhaseId={currentPhase?.id ?? null}
+                asOfDate={asOfDate}
+                groups={taskGroups}
+                closingTimingGroups={closingTimingGroups}
+                selectedTaskId={selectedTaskId}
+                onSelectTask={selectTask}
               />
-              <MiraiTaskChecklistPane
-                key={checklistKey}
-                taskTitle={selectedTask?.title ?? null}
-                items={selectedTask?.checklists ?? []}
-              />
-            </>
-          )}
-        </div>
+            )}
+
+            {isCommitteeMode ? (
+              <>
+                <MiraiCommitteeDraftPane
+                  selectedMonthLabel={selectedAnnualMonth?.label ?? ""}
+                  priorYearGroups={shidaiGroups}
+                  currentYearPrior={currentYearPrior}
+                  draft={monthDraft}
+                  focusedRecord={selectedShidai}
+                  onFocusRecord={selectShidai}
+                />
+                <MiraiShidaiDocumentPane
+                  monthLabel={selectedAnnualMonth?.label ?? ""}
+                  draft={monthDraft}
+                  record={selectedShidai}
+                  onUpdateDraft={setWorkingDraft}
+                />
+              </>
+            ) : (
+              <>
+                <MiraiTaskDetailPane
+                  task={selectedTask}
+                  domainName={selectedDomain?.name ?? ""}
+                  trackName={selectedTrack?.name ?? ""}
+                />
+                <MiraiTaskChecklistPane
+                  key={checklistKey}
+                  taskTitle={selectedTask?.title ?? null}
+                  items={selectedTask?.checklists ?? []}
+                />
+              </>
+            )}
+          </div>
+        )}
       </SidebarInset>
     </SidebarProvider>
   );

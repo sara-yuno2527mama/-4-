@@ -10,10 +10,12 @@ import { z } from "zod";
 
 import {
   miraiBusinessMonthSchema,
+  miraiColumnIdSchema,
   miraiCommitteeMeetingSchema,
   miraiJoinMilestoneSchema,
   miraiMonthlyRosterSchema,
 } from "@/lib/mirai-schema";
+import { MIRAI_DEFAULT_VISIBLE_COLUMNS } from "@/lib/mirai/columns";
 
 export const MIRAI_ROSTER_STORAGE_KEY = "mirai:roster:v1";
 
@@ -27,6 +29,10 @@ export const miraiRosterStateSchema = z.object({
   committeeMeetings: z.array(miraiCommitteeMeetingSchema).default([]),
   /** 参観コンテストの集約マイルストーン（§16.3） */
   joinMilestones: z.array(miraiJoinMilestoneSchema).default([]),
+  /** 番組表で表示中の業務列（列ピッカーのユーザー設定。§3.3） */
+  visibleColumns: z
+    .array(miraiColumnIdSchema)
+    .default([...MIRAI_DEFAULT_VISIBLE_COLUMNS]),
 });
 export type MiraiRosterState = z.infer<typeof miraiRosterStateSchema>;
 
@@ -56,10 +62,13 @@ export const MIRAI_ROSTER_DEFAULT: MiraiRosterState = {
     { id: "cm-main-0628", kind: "committee", heldOn: "2026-06-28" },
   ],
   joinMilestones: [],
+  visibleColumns: [...MIRAI_DEFAULT_VISIBLE_COLUMNS],
 };
 
 /** 空の月次ロスター（新しい YYYY-MM に初めて追加するとき用） */
-export function emptyMonthlyRoster(yearMonth: string): MiraiRosterState["rosters"][number] {
+export function emptyMonthlyRoster(
+  yearMonth: string,
+): MiraiRosterState["rosters"][number] {
   return {
     yearMonth,
     lunchDutyDates: [],

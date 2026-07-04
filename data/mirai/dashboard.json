@@ -417,6 +417,75 @@
       "summary": "事務局長承認後に実行する振込のキューをファイリング用に揃える。"
     }
   ],
+  "dailyBlocks": [
+    {
+      "id": "db-0523-travel-1",
+      "date": "2026-05-23",
+      "columnId": "soumu-travel",
+      "plannedStart": "09:35",
+      "plannedEnd": "10:30",
+      "title": "JTB 請求データ確認",
+      "note": "月末締め前の下ごしらえ"
+    },
+    {
+      "id": "db-0523-travel-2",
+      "date": "2026-05-23",
+      "columnId": "soumu-travel",
+      "plannedStart": "11:00",
+      "plannedEnd": "12:00",
+      "title": "出張手配メール返信"
+    },
+    {
+      "id": "db-0523-committee-1",
+      "date": "2026-05-23",
+      "columnId": "mirai-committee",
+      "plannedStart": "10:30",
+      "plannedEnd": "11:30",
+      "title": "本会 資料パック v0"
+    },
+    {
+      "id": "db-0523-kaizen-1",
+      "date": "2026-05-23",
+      "columnId": "mirai-kaizen",
+      "plannedStart": "13:30",
+      "plannedEnd": "14:30",
+      "title": "手順書アップデート"
+    },
+    {
+      "id": "db-0523-private-1",
+      "date": "2026-05-23",
+      "columnId": "private",
+      "plannedStart": "14:30",
+      "plannedEnd": "15:30",
+      "title": "陶芸HP 制作"
+    },
+    {
+      "id": "db-0523-pair-committee-1",
+      "date": "2026-05-23",
+      "columnId": "mirai-committee",
+      "plannedStart": "09:30",
+      "plannedEnd": "10:30",
+      "title": "本会 次第送付・出欠回収",
+      "assignee": "ペア"
+    },
+    {
+      "id": "db-0523-pair-travel-1",
+      "date": "2026-05-23",
+      "columnId": "soumu-travel",
+      "plannedStart": "13:00",
+      "plannedEnd": "14:00",
+      "title": "振込承認待ち一覧の更新",
+      "assignee": "ペア"
+    },
+    {
+      "id": "db-0517-committee-1",
+      "date": "2026-05-17",
+      "columnId": "mirai-committee",
+      "plannedStart": "10:00",
+      "plannedEnd": "11:00",
+      "title": "委員会フォロー送付"
+    }
+  ],
   "shidaiDrafts": [
     {
       "targetMonthId": "2026-05",
@@ -484,10 +553,7 @@
         "会場比較表を5月本会までに主担当が作成",
         "協賛金額レンジは事務局長承認後にペアが案内文へ反映"
       ],
-      "homework": [
-        "ペア：5月本会の日程調整・出欠依頼",
-        "主：会場比較表 v0"
-      ]
+      "homework": ["ペア：5月本会の日程調整・出欠依頼", "主：会場比較表 v0"]
     },
     {
       "id": "sh-25-04-main",
@@ -545,10 +611,7 @@
         "参加企業の一次選定は6月第1週まで",
         "発表会は11月想定で会場候補調査を開始"
       ],
-      "homework": [
-        "主：選定基準シート",
-        "ペア：6月本会の次第・資料依頼"
-      ]
+      "homework": ["主：選定基準シート", "ペア：6月本会の次第・資料依頼"]
     },
     {
       "id": "sh-25-05-fu",
@@ -589,14 +652,8 @@
         "報告書スケジュール",
         "閉会"
       ],
-      "decisions": [
-        "参加12社で確定",
-        "現場リハーサルは8月第3週"
-      ],
-      "homework": [
-        "主：企業別フォロー表",
-        "ペア：参加企業への確定通知"
-      ]
+      "decisions": ["参加12社で確定", "現場リハーサルは8月第3週"],
+      "homework": ["主：企業別フォロー表", "ペア：参加企業への確定通知"]
     }
   ]
 }

@@ -22,6 +22,7 @@ import {
 } from "@/lib/mirai/business-month";
 import { currentSchedulePhase, isOpenTask } from "@/lib/mirai/computed";
 import { formatISODate, parseISODate } from "@/lib/computed/profile";
+import { buildDelegatedAlerts } from "@/lib/mirai/delegated";
 
 /** 「期限が近い」と見なす日数（今週相当） */
 const NEAR_DUE_DAYS = 7;
@@ -204,6 +205,9 @@ function buildAlerts(
       });
     }
   }
+
+  // 5. ペア振り期限（§9 / §11 Phase A）
+  alerts.push(...buildDelegatedAlerts(roster.delegatedToPair, asOfDate));
 
   return { alerts, regularMailToday };
 }

@@ -1,5 +1,6 @@
 import {
   type MiraiCommitteeMeetingKind,
+  type MiraiDelegateStatus,
   type MiraiDutyBlockKind,
   type MiraiHolidayKind,
   type MiraiShidaiKind,
@@ -36,6 +37,14 @@ export const MIRAI_HOLIDAY_KIND_LABELS: Record<MiraiHolidayKind, string> = {
   full: "有休",
   holiday: "休日",
 };
+
+/** ペアに振った仕事の進捗ラベル（§9） */
+export const MIRAI_DELEGATE_STATUS_LABELS: Record<MiraiDelegateStatus, string> =
+  {
+    todo: "未着手",
+    doing: "対応中",
+    done: "完了",
+  };
 
 /** 当番ブロックの種別ラベル（§6.1 / §13 dutyBlock） */
 export const MIRAI_DUTY_BLOCK_KIND_LABELS: Record<MiraiDutyBlockKind, string> =

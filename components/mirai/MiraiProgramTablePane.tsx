@@ -12,9 +12,9 @@
  * ブロックの縦位置は「分 × PX_PER_MIN」で absolute 配置する。
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { addDays } from "date-fns";
-import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, Timer } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -29,15 +29,22 @@ import {
   type MiraiProgramBlock,
   type MiraiWorkloadSummary,
   MIRAI_ASSIGNEES,
+  carryoverBlocks,
+  dayActualSummary,
   dayHalfOf,
   dayWorkloadSummary,
+  fmtDurationMin,
   hhmmOf,
+  minutesOf,
+  placeCarryoverTimes,
   programDayModel,
 } from "@/lib/mirai/program";
 import { type MiraiRosterState } from "@/lib/mirai/roster-state";
 import { type MiraiRosterActions } from "@/hooks/use-mirai-roster";
 import { formatISODate, parseISODate } from "@/lib/computed/profile";
 import { MiraiColumnPicker } from "@/components/mirai/MiraiColumnPicker";
+import { MiraiCarryoverStrip } from "@/components/mirai/MiraiCarryoverStrip";
+import { MiraiProgramDetailRail } from "@/components/mirai/MiraiProgramDetailRail";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -54,9 +61,18 @@ type MiraiProgramTablePaneProps = {
   roster: MiraiRosterState;
   actions: MiraiRosterActions;
   settings: MiraiWorkDaySettings;
-  dailyBlocks: readonly MiraiDailyBlock[];
   asOfDate: string;
+  deviceRole: MiraiAssignee;
+  onDeviceRoleChange: (role: MiraiAssignee) => void;
 };
+
+/** 経過ミリ秒 → mm:ss（タイマーの計測中表示） */
+function elapsedMmSs(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
 
 function weekdayLabel(date: string): string {
   const d = parseISODate(date);
@@ -81,18 +97,71 @@ export function MiraiProgramTablePane({
   roster,
   actions,
   settings,
-  dailyBlocks,
   asOfDate,
+  deviceRole,
+  onDeviceRoleChange,
 }: MiraiProgramTablePaneProps) {
   const [date, setDate] = useState(asOfDate);
-  const [assignee, setAssignee] = useState<MiraiAssignee>("主");
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+
+  const dailyBlocks = roster.dailyBlocks;
+  const timer = roster.timer;
 
   const visibleColumns = roster.visibleColumns;
   const model = programDayModel(roster, settings, date, dailyBlocks);
   const { dayStartMin, dayEndMin, flags, bands, blocks, allDayOff } = model;
 
   const currentHalf = dayHalfOf(roster, date);
-  const workload = dayWorkloadSummary(model, assignee);
+  const workload = dayWorkloadSummary(model, deviceRole);
+  const actualSummary = dayActualSummary(model, deviceRole);
+
+  // 表示日・担当に載っている選択ブロックだけを有効にする（別日の選択は無効）
+  const selectedBlock =
+    blocks.find(
+      (b) => b.id === selectedBlockId && b.assignee === deviceRole && !b.locked,
+    ) ?? null;
+
+  // 実行中タイマーの経過（計測中のみ 1 秒ごとに更新。SSR/hydration 安全に 0 起点）
+  const [nowMs, setNowMs] = useState(0);
+  useEffect(() => {
+    if (!timer) return;
+    setNowMs(Date.now());
+    const id = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [timer]);
+
+  const runningBlock =
+    timer?.blockId != null
+      ? (blocks.find(
+          (b) =>
+            b.id === timer.blockId &&
+            b.assignee === deviceRole &&
+            !b.locked,
+        ) ?? null)
+      : null;
+
+  const elapsedForRunning =
+    runningBlock && timer && nowMs > 0
+      ? elapsedMmSs(nowMs - timer.startedAtMs)
+      : null;
+
+  const carryover = allDayOff
+    ? []
+    : carryoverBlocks(dailyBlocks, date, deviceRole);
+
+  const placeCarryoverToday = (block: MiraiDailyBlock) => {
+    const dur = Math.max(
+      0,
+      minutesOf(block.plannedEnd) - minutesOf(block.plannedStart),
+    );
+    const slot = placeCarryoverTimes(model, dur, deviceRole);
+    actions.moveBlockToDate(
+      block.id,
+      date,
+      hhmmOf(slot.startMin),
+      hhmmOf(slot.endMin),
+    );
+  };
 
   const top = (min: number) => (min - dayStartMin) * PX_PER_MIN;
   const height = (a: number, b: number) => (b - a) * PX_PER_MIN;
@@ -103,7 +172,7 @@ export function MiraiProgramTablePane({
   if (hourMarks[hourMarks.length - 1] !== dayEndMin) hourMarks.push(dayEndMin);
 
   const blocksByColumn = (columnId: MiraiColumnId) =>
-    blocks.filter((b) => b.columnId === columnId && b.assignee === assignee);
+    blocks.filter((b) => b.columnId === columnId && b.assignee === deviceRole);
 
   const dayBadges: { label: string; variant: "secondary" | "destructive" }[] =
     [];
@@ -182,9 +251,9 @@ export function MiraiProgramTablePane({
               <Button
                 key={a}
                 size="sm"
-                variant={assignee === a ? "secondary" : "ghost"}
-                aria-pressed={assignee === a}
-                onClick={() => setAssignee(a)}
+                variant={deviceRole === a ? "secondary" : "ghost"}
+                aria-pressed={deviceRole === a}
+                onClick={() => onDeviceRoleChange(a)}
               >
                 {a}
               </Button>
@@ -231,96 +300,130 @@ export function MiraiProgramTablePane({
         </div>
       )}
 
-      {visibleColumns.length === 0 ? (
-        <ProgramEmpty message="「列」から表示する業務列を選んでください。" />
-      ) : allDayOff ? (
+      {allDayOff ? (
         <ProgramEmpty
           message={`${weekdayLabel(date)} は終日休みです（番組表なし）。`}
         />
       ) : (
-        <div className="min-h-0 flex-1 overflow-auto">
-          <div className="w-max min-w-full">
-            {/* 列ヘッダー（縦スクロール時に固定） */}
-            <div className="sticky top-0 z-20 flex border-b border-border bg-background">
-              <div className="shrink-0" style={{ width: AXIS_W }} />
-              {visibleColumns.map((columnId) => (
-                <div
-                  key={columnId}
-                  className="shrink-0 truncate border-l border-border px-2 py-1.5 text-xs font-medium text-foreground first:border-l-0"
-                  style={{ width: COL_W }}
-                >
-                  {miraiColumnLabel(columnId)}
-                </div>
-              ))}
-            </div>
+        <>
+          <MiraiCarryoverStrip
+            items={carryover}
+            onPlaceToday={placeCarryoverToday}
+            onDismiss={(blockId) => actions.dismissCarryover(blockId)}
+          />
 
-            {/* 本体（時間軸 + 列） */}
-            <div className="relative flex" style={{ height: gridHeight }}>
-              <div
-                className="relative shrink-0 border-r border-border"
-                style={{ width: AXIS_W }}
-              >
-                {hourMarks.map((m) => (
-                  <span
-                    key={m}
-                    className="absolute right-1.5 text-[10px] text-muted-foreground tabular-nums"
-                    style={{ top: top(m) }}
-                  >
-                    {hhmmOf(m)}
-                  </span>
-                ))}
-              </div>
-
-              <div className="relative flex">
-                {/* 背景：時間ガイド線 + バンド（全列にまたがる） */}
-                <div className="pointer-events-none absolute inset-0">
-                  {hourMarks.map((m) => (
-                    <div
-                      key={m}
-                      className="absolute inset-x-0 border-t border-border/50"
-                      style={{ top: top(m) }}
-                    />
-                  ))}
-                  {bands.map((band) => (
-                    <div
-                      key={band.id}
-                      className={cn(
-                        "absolute inset-x-0 flex items-start",
-                        BAND_CLASS[band.kind],
-                      )}
-                      style={{
-                        top: top(band.startMin),
-                        height: height(band.startMin, band.endMin),
-                      }}
-                    >
-                      <span className="px-2 py-0.5 text-[10px] text-muted-foreground">
-                        {band.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* 列ごとのブロック */}
-                {visibleColumns.map((columnId) => (
-                  <div
-                    key={columnId}
-                    className="relative shrink-0 border-l border-border first:border-l-0"
-                    style={{ width: COL_W }}
-                  >
-                    {blocksByColumn(columnId).map((block) => (
-                      <ProgramBlockView
-                        key={block.key}
-                        block={block}
-                        top={top(block.startMin)}
-                        blockHeight={height(block.startMin, block.endMin)}
-                      />
+          <div className="flex min-h-0 flex-1">
+            {visibleColumns.length === 0 ? (
+              <ProgramEmpty message="「列」から表示する業務列を選んでください。" />
+            ) : (
+              <div className="min-h-0 flex-1 overflow-auto">
+                <div className="w-max min-w-full">
+                  {/* 列ヘッダー（縦スクロール時に固定） */}
+                  <div className="sticky top-0 z-20 flex border-b border-border bg-background">
+                    <div className="shrink-0" style={{ width: AXIS_W }} />
+                    {visibleColumns.map((columnId) => (
+                      <div
+                        key={columnId}
+                        className="shrink-0 truncate border-l border-border px-2 py-1.5 text-xs font-medium text-foreground first:border-l-0"
+                        style={{ width: COL_W }}
+                      >
+                        {miraiColumnLabel(columnId)}
+                      </div>
                     ))}
                   </div>
-                ))}
+
+                  {/* 本体（時間軸 + 列） */}
+                  <div className="relative flex" style={{ height: gridHeight }}>
+                    <div
+                      className="relative shrink-0 border-r border-border"
+                      style={{ width: AXIS_W }}
+                    >
+                      {hourMarks.map((m) => (
+                        <span
+                          key={m}
+                          className="absolute right-1.5 text-[10px] text-muted-foreground tabular-nums"
+                          style={{ top: top(m) }}
+                        >
+                          {hhmmOf(m)}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="relative flex">
+                      {/* 背景：時間ガイド線 + バンド（全列にまたがる） */}
+                      <div className="pointer-events-none absolute inset-0">
+                        {hourMarks.map((m) => (
+                          <div
+                            key={m}
+                            className="absolute inset-x-0 border-t border-border/50"
+                            style={{ top: top(m) }}
+                          />
+                        ))}
+                        {bands.map((band) => (
+                          <div
+                            key={band.id}
+                            className={cn(
+                              "absolute inset-x-0 flex items-start",
+                              BAND_CLASS[band.kind],
+                            )}
+                            style={{
+                              top: top(band.startMin),
+                              height: height(band.startMin, band.endMin),
+                            }}
+                          >
+                            <span className="px-2 py-0.5 text-[10px] text-muted-foreground">
+                              {band.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* 列ごとのブロック */}
+                      {visibleColumns.map((columnId) => (
+                        <div
+                          key={columnId}
+                          className="relative shrink-0 border-l border-border first:border-l-0"
+                          style={{ width: COL_W }}
+                        >
+                          {blocksByColumn(columnId).map((block) => (
+                            <ProgramBlockView
+                              key={block.key}
+                              block={block}
+                              top={top(block.startMin)}
+                              blockHeight={height(block.startMin, block.endMin)}
+                              selected={
+                                !!block.id && block.id === selectedBlockId
+                              }
+                              running={
+                                !!block.id && timer?.blockId === block.id
+                              }
+                              onSelect={
+                                block.locked || !block.id
+                                  ? undefined
+                                  : () => setSelectedBlockId(block.id ?? null)
+                              }
+                            />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+
+            <MiraiProgramDetailRail
+              summary={actualSummary}
+              viewedDate={date}
+              visibleColumns={visibleColumns}
+              selectedBlock={selectedBlock}
+              runningBlock={runningBlock}
+              elapsedLabel={elapsedForRunning}
+              deviceRole={deviceRole}
+              actions={actions}
+            />
           </div>
-        </div>
+        </>
       )}
     </section>
   );
@@ -330,44 +433,87 @@ function ProgramBlockView({
   block,
   top,
   blockHeight,
+  selected,
+  running,
+  onSelect,
 }: {
   block: MiraiProgramBlock;
   top: number;
   blockHeight: number;
+  selected: boolean;
+  running: boolean;
+  onSelect?: () => void;
 }) {
-  return (
-    <div
-      className={cn(
-        "absolute inset-x-1 flex flex-col gap-0.5 overflow-hidden rounded-md border px-1.5 py-1",
-        block.locked
-          ? "border-border bg-secondary text-secondary-foreground"
-          : "border-border bg-card text-card-foreground shadow-xs",
-      )}
-      style={{ top, height: blockHeight }}
-      title={`${block.title}（${block.timeLabel}）`}
-    >
+  const actualLabel =
+    block.actualStartMin !== undefined && block.actualEndMin !== undefined
+      ? `${hhmmOf(block.actualStartMin)}–${hhmmOf(block.actualEndMin)}`
+      : null;
+
+  const content = (
+    <>
       <span className="flex items-center gap-1">
         {block.locked ? (
           <Lock className="size-3 shrink-0 text-muted-foreground" />
+        ) : running ? (
+          <Timer className="size-3 shrink-0 text-primary" />
         ) : null}
-        <span className="truncate text-[11px] leading-tight font-medium">
+        <span className="min-w-0 flex-1 truncate text-[11px] leading-tight font-medium">
           {block.title}
         </span>
+        {block.done ? (
+          <Badge variant="secondary" size="xs">
+            済
+          </Badge>
+        ) : running ? (
+          <Badge variant="default" size="xs">
+            計測中
+          </Badge>
+        ) : null}
       </span>
       <span className="text-[10px] text-muted-foreground tabular-nums">
         {block.timeLabel}
       </span>
+      {actualLabel ? (
+        <span className="text-[10px] text-primary tabular-nums">
+          実 {actualLabel}
+        </span>
+      ) : null}
+    </>
+  );
+
+  const baseClass = cn(
+    "absolute inset-x-1 flex flex-col gap-0.5 overflow-hidden rounded-md border px-1.5 py-1 text-left",
+    block.locked
+      ? "border-border bg-secondary text-secondary-foreground"
+      : "border-border bg-card text-card-foreground shadow-xs",
+    running && "border-primary ring-1 ring-primary/40",
+    selected && "ring-2 ring-ring",
+  );
+
+  const title = `${block.title}（${block.timeLabel}）${
+    actualLabel ? ` 実績 ${actualLabel}` : ""
+  }`;
+
+  if (onSelect) {
+    return (
+      <button
+        type="button"
+        className={cn(baseClass, "cursor-pointer transition-colors hover:bg-accent")}
+        style={{ top, height: blockHeight }}
+        title={title}
+        aria-pressed={selected}
+        onClick={onSelect}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className={baseClass} style={{ top, height: blockHeight }} title={title}>
+      {content}
     </div>
   );
-}
-
-/** 分 → 「4時間55分」形式（業務時間バーの表示用） */
-function fmtDur(min: number): string {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  if (h === 0) return `${m}分`;
-  if (m === 0) return `${h}時間`;
-  return `${h}時間${m}分`;
 }
 
 /** 業務時間バー（§7.3）。予定 vs 実質可能時間と、15:30 見込み超過アラート。 */
@@ -386,7 +532,7 @@ function WorkloadBar({ summary }: { summary: MiraiWorkloadSummary }) {
       <div
         className="h-1.5 w-28 overflow-hidden rounded-full bg-muted"
         role="img"
-        aria-label={`予定 ${fmtDur(plannedMin)} / 可能 ${fmtDur(availableMin)}`}
+        aria-label={`予定 ${fmtDurationMin(plannedMin)} / 可能 ${fmtDurationMin(availableMin)}`}
       >
         <div
           className={cn(
@@ -397,11 +543,11 @@ function WorkloadBar({ summary }: { summary: MiraiWorkloadSummary }) {
         />
       </div>
       <span className="text-[11px] text-muted-foreground tabular-nums">
-        予定 {fmtDur(plannedMin)} / 可能 {fmtDur(availableMin)}
+        予定 {fmtDurationMin(plannedMin)} / 可能 {fmtDurationMin(availableMin)}
       </span>
       {over ? (
         <Badge variant="destructive" size="xs">
-          15:30に収まらない見込み +{fmtDur(overMin)}
+          15:30に収まらない見込み +{fmtDurationMin(overMin)}
         </Badge>
       ) : null}
     </div>

@@ -1,18 +1,27 @@
 import { describe, expect, it } from "vitest";
 
 import dashboardData from "@/data/mirai/dashboard.json";
-import { miraiDashboardSchema } from "@/lib/mirai-schema";
+import {
+  type MiraiDailyBlock,
+  miraiDashboardSchema,
+} from "@/lib/mirai-schema";
 import {
   MIRAI_ROSTER_DEFAULT,
   type MiraiRosterState,
 } from "@/lib/mirai/roster-state";
 import {
   MIRAI_DEFAULT_WORK_DAY,
+  blockDiffMin,
+  carryoverBlocks,
+  dayActualSummary,
   dayHalfOf,
   dayWorkloadSummary,
   dutyBlocksForDate,
+  isCarryoverEligible,
+  isDailyBlockDone,
   minutesOf,
   normalizeAssignee,
+  placeCarryoverTimes,
   programDayModel,
 } from "@/lib/mirai/program";
 
@@ -162,5 +171,141 @@ describe("mirai 番組表の担当・半休・業務時間バー（Phase 3）", 
     );
     const summary = dayWorkloadSummary(model, "主");
     expect(summary.availableMin).toBe(150);
+  });
+});
+
+describe("mirai 番組表のタイマー実績・予実差・繰越（Phase 3 後半）", () => {
+  const block = (over: Partial<MiraiDailyBlock>): MiraiDailyBlock => ({
+    id: "b",
+    date: "2026-05-23",
+    columnId: "soumu-travel",
+    plannedStart: "09:00",
+    plannedEnd: "10:00",
+    title: "テスト予定",
+    ...over,
+  });
+
+  it("完了は明示 done=true のみ（actual があっても未完了のまま）", () => {
+    expect(isDailyBlockDone(block({}))).toBe(false);
+    expect(isDailyBlockDone(block({ done: false }))).toBe(false);
+    expect(
+      isDailyBlockDone(block({ actualStart: "09:00", actualEnd: "10:00" })),
+    ).toBe(false);
+    expect(isDailyBlockDone(block({ done: true }))).toBe(true);
+    expect(
+      isDailyBlockDone(
+        block({ done: true, actualStart: "09:00", actualEnd: "10:00" }),
+      ),
+    ).toBe(true);
+  });
+
+  it("actual があっても予実差は出せるが、日次サマリの完了件数は done=true のみ", () => {
+    const withActual = programDayModel(
+      MIRAI_ROSTER_DEFAULT,
+      MIRAI_DEFAULT_WORK_DAY,
+      "2026-05-23",
+      [block({ id: "actual-only", actualStart: "09:05", actualEnd: "10:20" })],
+    ).blocks.find((b) => b.id === "actual-only")!;
+    expect(blockDiffMin(withActual)).toBe(15);
+
+    const model = programDayModel(
+      MIRAI_ROSTER_DEFAULT,
+      MIRAI_DEFAULT_WORK_DAY,
+      "2026-05-23",
+      [
+        block({ id: "done", done: true, actualStart: "09:05", actualEnd: "10:20" }),
+        block({ id: "actual-only", actualStart: "09:05", actualEnd: "10:20" }),
+        block({ id: "todo", plannedStart: "13:00", plannedEnd: "13:30" }),
+      ],
+    );
+    const summary = dayActualSummary(model, "主");
+    expect(summary.plannedMin).toBe(150);
+    expect(summary.actualMin).toBe(75);
+    expect(summary.diffMin).toBe(15);
+    expect(summary.doneCount).toBe(1);
+    expect(summary.totalCount).toBe(3);
+  });
+
+  it("予実差は 実績 − 予定（超過は正・短縮は負・未記録は null）", () => {
+    const done = programDayModel(MIRAI_ROSTER_DEFAULT, MIRAI_DEFAULT_WORK_DAY, "2026-05-23", [
+      block({ id: "over", done: true, actualStart: "09:05", actualEnd: "10:20" }),
+    ]).blocks.find((b) => b.id === "over")!;
+    expect(blockDiffMin(done)).toBe(15);
+
+    const fast = programDayModel(MIRAI_ROSTER_DEFAULT, MIRAI_DEFAULT_WORK_DAY, "2026-05-23", [
+      block({ id: "fast", done: true, actualStart: "09:00", actualEnd: "09:45" }),
+    ]).blocks.find((b) => b.id === "fast")!;
+    expect(blockDiffMin(fast)).toBe(-15);
+
+    const notDone = programDayModel(MIRAI_ROSTER_DEFAULT, MIRAI_DEFAULT_WORK_DAY, "2026-05-23", [
+      block({ id: "todo" }),
+    ]).blocks.find((b) => b.id === "todo")!;
+    expect(blockDiffMin(notDone)).toBeNull();
+  });
+
+  it("日次サマリは done=true かつ実績ありのブロックだけ集計する（主）", () => {
+    const model = programDayModel(MIRAI_ROSTER_DEFAULT, MIRAI_DEFAULT_WORK_DAY, "2026-05-23", [
+      block({ id: "done", done: true, actualStart: "09:05", actualEnd: "10:20" }),
+      block({ id: "todo", plannedStart: "13:00", plannedEnd: "13:30" }),
+    ]);
+    const summary = dayActualSummary(model, "主");
+    expect(summary.plannedMin).toBe(90);
+    expect(summary.actualMin).toBe(75);
+    expect(summary.diffMin).toBe(15);
+    expect(summary.doneCount).toBe(1);
+    expect(summary.totalCount).toBe(2);
+  });
+
+  it("繰越は表示日より前の未完了（done=false・dismissed=false）だけを担当・日付順で返す", () => {
+    const blocks: MiraiDailyBlock[] = [
+      block({ id: "y1", date: "2026-05-22", plannedStart: "11:00", plannedEnd: "12:00" }),
+      block({ id: "y0", date: "2026-05-22", plannedStart: "09:00", plannedEnd: "10:00" }),
+      block({ id: "done", date: "2026-05-22", done: true }),
+      block({
+        id: "actual-not-done",
+        date: "2026-05-22",
+        actualStart: "09:00",
+        actualEnd: "10:00",
+      }),
+      block({ id: "dismissed", date: "2026-05-22", dismissed: true }),
+      block({ id: "today", date: "2026-05-23" }),
+      block({ id: "pair", date: "2026-05-21", assignee: "ペア" }),
+    ];
+    const result = carryoverBlocks(blocks, "2026-05-23", "主");
+    expect(result.map((b) => b.id)).toEqual(["y0", "actual-not-done", "y1"]);
+  });
+
+  it("dismissed または done のブロックは繰越対象外", () => {
+    expect(isCarryoverEligible(block({ dismissed: true }))).toBe(false);
+    expect(isCarryoverEligible(block({ done: true }))).toBe(false);
+    expect(isCarryoverEligible(block({}))).toBe(true);
+  });
+
+  it("今日に載せるは勤務開始直後の空き枠に置く（5/23・主）", () => {
+    // 5/23 の seed 予定は 9:35 開始 → 9:00–9:35 が空く。30 分は収まる。
+    const model = programDayModel(
+      MIRAI_ROSTER_DEFAULT,
+      MIRAI_DEFAULT_WORK_DAY,
+      "2026-05-23",
+      dailyBlocks,
+    );
+    const slot = placeCarryoverTimes(model, 30, "主");
+    expect(slot.startMin).toBe(minutesOf("09:00"));
+    expect(slot.endMin).toBe(minutesOf("09:30"));
+  });
+
+  it("収まる空きが無い繰越は末尾（占有の後ろ）に置き、昼休みに食い込まない（5/23・主）", () => {
+    // 5/23 は 9:00–9:35 の 35 分しか空きがなく、60 分は収まらない → 末尾（16:00 以降）。
+    const model = programDayModel(
+      MIRAI_ROSTER_DEFAULT,
+      MIRAI_DEFAULT_WORK_DAY,
+      "2026-05-23",
+      dailyBlocks,
+    );
+    const slot = placeCarryoverTimes(model, 60, "主");
+    const overlapLunch =
+      slot.startMin < minutesOf("13:00") && slot.endMin > minutesOf("12:00");
+    expect(overlapLunch).toBe(false);
+    expect(slot.startMin).toBeGreaterThanOrEqual(minutesOf("16:00"));
   });
 });

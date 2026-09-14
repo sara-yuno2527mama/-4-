@@ -34,6 +34,15 @@ export function hhmmOf(min: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+/** 分 → 「4時間55分」形式（業務時間バー・予実サマリの表示用） */
+export function fmtDurationMin(min: number): string {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  if (h === 0) return `${m}分`;
+  if (m === 0) return `${h}時間`;
+  return `${h}時間${m}分`;
+}
+
 /** 勤務時間の既定（§7.1）。dashboard.workDaySettings 未指定時に使う。 */
 export const MIRAI_DEFAULT_WORK_DAY: MiraiWorkDaySettings = {
   workStart: "09:00",
@@ -163,6 +172,8 @@ export type MiraiProgramBand = {
 
 export type MiraiProgramBlock = {
   key: string;
+  /** 予定ブロックの id（当番など locked ブロックは undefined）。タイマー/選択の対象。 */
+  id?: string;
   columnId: MiraiColumnId;
   startMin: number;
   endMin: number;
@@ -171,6 +182,12 @@ export type MiraiProgramBlock = {
   timeLabel: string;
   locked: boolean;
   assignee: MiraiAssignee;
+  /** 実績開始/終了（§8.2。タイマー停止 or 手入力。分） */
+  actualStartMin?: number;
+  actualEndMin?: number;
+  /** 実績が確定している（完了。§8.4 の繰越判定に使う） */
+  done: boolean;
+  note?: string;
 };
 
 export type MiraiProgramDayModel = {
@@ -276,14 +293,16 @@ export function programDayModel(
       timeLabel: timeRange(b.plannedStart, b.plannedEnd),
       locked: true,
       assignee: normalizeAssignee(b.assignee),
+      done: false,
     }),
   );
 
-  // 予定ブロック（seed）
+  // 予定ブロック（roster / localStorage。タイマー・実績・繰越で編集される）
   const plannedBlocks: MiraiProgramBlock[] = dailyBlocks
     .filter((b) => b.date === date)
     .map((b) => ({
       key: `plan-${b.id}`,
+      id: b.id,
       columnId: b.columnId,
       startMin: minutesOf(b.plannedStart),
       endMin: minutesOf(b.plannedEnd),
@@ -291,6 +310,10 @@ export function programDayModel(
       timeLabel: timeRange(b.plannedStart, b.plannedEnd),
       locked: false,
       assignee: normalizeAssignee(b.assignee),
+      actualStartMin: b.actualStart ? minutesOf(b.actualStart) : undefined,
+      actualEndMin: b.actualEnd ? minutesOf(b.actualEnd) : undefined,
+      done: isDailyBlockDone(b),
+      note: b.note,
     }));
 
   return {
@@ -374,4 +397,160 @@ export function dayWorkloadSummary(
     dutyMin,
     overMin: Math.max(0, plannedMin - availableMin),
   };
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * Phase 3 後半：タイマー実績・予実差・繰越（§8.2 / §8.4）。純粋関数のみ。
+ * ───────────────────────────────────────────────────────────────────────── */
+
+/** 明示完了か（§18.2。actual の有無だけでは完了にしない） */
+export function isDailyBlockDone(block: MiraiDailyBlock): boolean {
+  return block.done === true;
+}
+
+/** 繰越トレイに載せるか（未完了かつ破棄されていない。§18.3） */
+export function isCarryoverEligible(block: MiraiDailyBlock): boolean {
+  return !block.dismissed && !isDailyBlockDone(block);
+}
+
+/** 予定の長さ（分） */
+export function plannedDurationMin(block: {
+  startMin: number;
+  endMin: number;
+}): number {
+  return Math.max(0, block.endMin - block.startMin);
+}
+
+/**
+ * 予実差（分。実績 − 予定）。完了していなければ null。
+ * 正 = 予定より長くかかった / 負 = 予定より早く終わった。§8.2。
+ */
+export function blockDiffMin(block: MiraiProgramBlock): number | null {
+  if (
+    block.actualStartMin === undefined ||
+    block.actualEndMin === undefined
+  ) {
+    return null;
+  }
+  const actual = Math.max(0, block.actualEndMin - block.actualStartMin);
+  return actual - plannedDurationMin(block);
+}
+
+export type MiraiActualSummary = {
+  assignee: MiraiAssignee;
+  /** その担当の予定合計（分。当番を除く全予定ブロック） */
+  plannedMin: number;
+  /** 完了ブロックの実績合計（分） */
+  actualMin: number;
+  /** 完了ブロックの予実差合計（分。実績 − 予定） */
+  diffMin: number;
+  doneCount: number;
+  totalCount: number;
+};
+
+/** その日・その担当の日次サマリ（予定合計 / 実績合計 / 差分。§8.2） */
+export function dayActualSummary(
+  model: MiraiProgramDayModel,
+  assignee: MiraiAssignee,
+): MiraiActualSummary {
+  const planned = model.blocks.filter(
+    (b) => !b.locked && b.assignee === assignee,
+  );
+  let plannedMin = 0;
+  let actualMin = 0;
+  let diffMin = 0;
+  let doneCount = 0;
+  for (const b of planned) {
+    plannedMin += plannedDurationMin(b);
+    if (!b.done) continue;
+    const diff = blockDiffMin(b);
+    if (diff !== null) {
+      doneCount += 1;
+      actualMin += plannedDurationMin(b) + diff;
+      diffMin += diff;
+    }
+  }
+  return {
+    assignee,
+    plannedMin,
+    actualMin,
+    diffMin,
+    doneCount,
+    totalCount: planned.length,
+  };
+}
+
+/**
+ * 繰越（§8.4）。表示日 `viewedDate` より前の日の、未完了の予定ブロックを集める。
+ * 担当（主/ペア）で絞り込み、日付→開始時刻の順に並べる。当番（locked）は対象外。
+ */
+export function carryoverBlocks(
+  allBlocks: readonly MiraiDailyBlock[],
+  viewedDate: string,
+  assignee: MiraiAssignee,
+): MiraiDailyBlock[] {
+  return allBlocks
+    .filter(
+      (b) =>
+        b.date < viewedDate &&
+        isCarryoverEligible(b) &&
+        normalizeAssignee(b.assignee) === assignee,
+    )
+    .sort(
+      (a, b) =>
+        a.date.localeCompare(b.date) ||
+        a.plannedStart.localeCompare(b.plannedStart),
+    );
+}
+
+/**
+ * 「今日に載せる」の配置先を求める（§8.4）。
+ * 勤務枠 [workStart, scheduleEnd) の中で、昼休み・半休・退勤準備・既存ブロック
+ * （その担当）を避けた最も早い空き枠に duration 分を置く。
+ * 収まる空きが無ければ末尾（最後の占有の後ろ）に置く（scheduleEnd を超え得る）。
+ */
+export function placeCarryoverTimes(
+  model: MiraiProgramDayModel,
+  durationMin: number,
+  assignee: MiraiAssignee,
+): { startMin: number; endMin: number } {
+  const winStart = model.dayStartMin;
+  const winEnd = model.scheduleEndMin;
+
+  const occupied: [number, number][] = [];
+  for (const band of model.bands) {
+    if (band.kind === "lunch" || band.kind === "holiday" || band.kind === "buffer") {
+      occupied.push([band.startMin, band.endMin]);
+    }
+  }
+  for (const b of model.blocks) {
+    if (b.assignee === assignee) occupied.push([b.startMin, b.endMin]);
+  }
+
+  // 開始でソートし、重なりをマージ
+  occupied.sort((a, b) => a[0] - b[0]);
+  const merged: [number, number][] = [];
+  for (const iv of occupied) {
+    const last = merged[merged.length - 1];
+    if (last && iv[0] <= last[1]) {
+      last[1] = Math.max(last[1], iv[1]);
+    } else {
+      merged.push([iv[0], iv[1]]);
+    }
+  }
+
+  // winStart から空きを探す
+  let cursor = winStart;
+  for (const [s, e] of merged) {
+    if (s - cursor >= durationMin && cursor + durationMin <= winEnd) {
+      return { startMin: cursor, endMin: cursor + durationMin };
+    }
+    cursor = Math.max(cursor, e);
+  }
+  if (winEnd - cursor >= durationMin) {
+    return { startMin: cursor, endMin: cursor + durationMin };
+  }
+  // 収まらない → 末尾（最後の占有の後ろ。scheduleEnd を超え得る）
+  const tail = Math.max(cursor, winStart);
+  return { startMin: tail, endMin: tail + durationMin };
 }

@@ -1,11 +1,12 @@
 "use client";
 
 /**
- * すぐ入力・当月メモ・締め日の状態フック（Phase 1・localStorage 暫定）。
+ * すぐ入力・当月メモ・締め日の状態フック（Phase 1）。
  *
- * SSR/hydration 安全のため `useSyncExternalStore` を使う（サーバーは既定値を返し、
- * クライアントは localStorage を読む）。useEffect 内での初期値 setState は使わない
- * （React 19 ルール準拠）。永続化の置き場は docs/mirai-storage-design.md 参照。
+ * 読み書きは async な repository 抽象（lib/mirai/repository）越しに行うが、UI から見える
+ * 読み取りは従来どおり同期のまま：メモリ内スナップショットを `useSyncExternalStore` で購読し、
+ * SSR/hydration は既定値（getServerSnapshot）で安全に整合させる。localStorage は開発・デモ
+ * 専用アダプタで、将来は同 interface の DB アダプタに差し替える（docs/mirai-storage-design.md §10）。
  */
 
 import { useSyncExternalStore } from "react";
@@ -13,71 +14,91 @@ import { useSyncExternalStore } from "react";
 import {
   type MiraiColumnId,
   type MiraiCommitteeMeetingKind,
+  type MiraiDelegateStatus,
   type MiraiHolidayKind,
 } from "@/lib/mirai-schema";
 import { MIRAI_DEFAULT_VISIBLE_COLUMNS } from "@/lib/mirai/columns";
 import {
+  addDelegatedItem,
+  removeDelegatedItem,
+  updateDelegatedItemStatus,
+  type AddDelegatedInput,
+} from "@/lib/mirai/delegated";
+import { LocalStorageRosterRepository } from "@/lib/mirai/repository/local-storage";
+import { type MiraiRosterRepository } from "@/lib/mirai/repository/types";
+import {
   MIRAI_ROSTER_DEFAULT,
-  MIRAI_ROSTER_STORAGE_KEY,
   emptyMonthlyRoster,
-  parseRosterState,
   type MiraiRosterState,
 } from "@/lib/mirai/roster-state";
 
 type Listener = () => void;
 
+/**
+ * 永続層の差し替え点：開発・デモは localStorage。将来 DB へ移すときはこの 1 行を
+ * DB アダプタ（同 MiraiRosterRepository 実装）に差し替えるだけでよい（storage §10.2/§10.3）。
+ */
+const repository: MiraiRosterRepository = new LocalStorageRosterRepository();
+
 let cache: MiraiRosterState | null = null;
 const listeners = new Set<Listener>();
-let storageBound = false;
+/** load() 済み・mutation 済み・他タブ更新受領済みのいずれか（古い load 結果での上書き防止） */
+let hydrated = false;
+let hydrationStarted = false;
+let repositorySubscribed = false;
 
-function load(): MiraiRosterState {
-  if (typeof window === "undefined") return MIRAI_ROSTER_DEFAULT;
-  return parseRosterState(
-    window.localStorage.getItem(MIRAI_ROSTER_STORAGE_KEY),
-  );
+function emit(): void {
+  listeners.forEach((l) => l());
+}
+
+/** repository.load() でメモリ cache を一度だけ hydrate する（fire-and-forget） */
+function ensureHydrated(): void {
+  if (hydrationStarted) return;
+  hydrationStarted = true;
+  void repository
+    .load()
+    .then((state) => {
+      if (hydrated) return;
+      hydrated = true;
+      cache = state;
+      emit();
+    })
+    .catch(() => {
+      // load 失敗時は既定値のまま（getSnapshot が MIRAI_ROSTER_DEFAULT を返す）
+    });
 }
 
 function getSnapshot(): MiraiRosterState {
-  if (cache === null) cache = load();
-  return cache;
+  return cache ?? MIRAI_ROSTER_DEFAULT;
 }
 
 function getServerSnapshot(): MiraiRosterState {
   return MIRAI_ROSTER_DEFAULT;
 }
 
-function emit() {
-  listeners.forEach((l) => l());
-}
-
 function subscribe(listener: Listener): () => void {
   listeners.add(listener);
-  if (!storageBound && typeof window !== "undefined") {
-    window.addEventListener("storage", (e) => {
-      if (e.key === MIRAI_ROSTER_STORAGE_KEY) {
-        cache = load();
-        emit();
-      }
+  ensureHydrated();
+  if (!repositorySubscribed && repository.subscribe) {
+    repository.subscribe((state) => {
+      hydrated = true;
+      cache = state;
+      emit();
     });
-    storageBound = true;
+    repositorySubscribed = true;
   }
   return () => {
     listeners.delete(listener);
   };
 }
 
+/** mutation：メモリ cache を即更新し、repository.save() へ write-through（失敗しても cache は保持） */
 function commit(next: MiraiRosterState): void {
   cache = next;
-  if (typeof window !== "undefined") {
-    try {
-      window.localStorage.setItem(
-        MIRAI_ROSTER_STORAGE_KEY,
-        JSON.stringify(next),
-      );
-    } catch {
-      // localStorage 不可（プライベートモード等）でもメモリ上は反映する
-    }
-  }
+  hydrated = true;
+  void repository.save(next).catch(() => {
+    // 保存失敗（localStorage 不可・DB 一時障害等）でもメモリ上の cache は保持する
+  });
   emit();
 }
 
@@ -85,8 +106,33 @@ function update(updater: (prev: MiraiRosterState) => MiraiRosterState): void {
   commit(updater(getSnapshot()));
 }
 
+// クライアントでは import 時点で先読みし、初回レンダー・クライアント遷移を
+// 既定値でちらつかせない（従来の同期読みと同等の体感を保つ）。SSR では走らない。
+if (typeof window !== "undefined") {
+  ensureHydrated();
+}
+
 function yearMonthOf(date: string): string {
   return date.slice(0, 7);
+}
+
+/** epoch ms → ローカル実時刻の HH:mm（タイマー実績の記録用。§8.2） */
+function hhmmFromMs(ms: number): string {
+  const d = new Date(ms);
+  return `${String(d.getHours()).padStart(2, "0")}:${String(
+    d.getMinutes(),
+  ).padStart(2, "0")}`;
+}
+
+/** 番組表の予定ブロックを1件だけ更新する（見つからなければそのまま） */
+function patchBlock(
+  state: MiraiRosterState,
+  blockId: string,
+  patch: Partial<MiraiRosterState["dailyBlocks"][number]>,
+): MiraiRosterState["dailyBlocks"] {
+  return state.dailyBlocks.map((b) =>
+    b.id === blockId ? { ...b, ...patch } : b,
+  );
 }
 
 function upsertRoster(
@@ -297,6 +343,164 @@ export const miraiRosterActions = {
     }));
   },
 
+  /* ── 番組表のタイマー・実績・繰越（§8.2 / §8.4） ── */
+
+  /**
+   * タイマー開始（§8.2。同時に1本のみ）。
+   * 既に別ブロックを計測中なら、その実績を確定してから新規開始する。
+   */
+  startTimer(blockId: string): void {
+    if (!blockId) return;
+    update((state) => {
+      const now = Date.now();
+      let dailyBlocks = state.dailyBlocks;
+      const prev = state.timer;
+      if (prev && prev.blockId !== blockId) {
+        dailyBlocks = patchBlock(state, prev.blockId, {
+          actualStart:
+            dailyBlocks.find((b) => b.id === prev.blockId)?.actualStart ??
+            hhmmFromMs(prev.startedAtMs),
+          actualEnd: hhmmFromMs(now),
+        });
+      }
+      return {
+        ...state,
+        dailyBlocks,
+        timer: { blockId, startedAtMs: now },
+      };
+    });
+  },
+
+  /** タイマー停止 → 実績（実時刻の HH:mm）を記録（§8.2）。未計画ブロックは planned も更新。 */
+  stopTimer(): void {
+    update((state) => {
+      const t = state.timer;
+      if (!t) return state;
+      const now = Date.now();
+      const endHhmm = hhmmFromMs(now);
+      const startHhmm = hhmmFromMs(t.startedAtMs);
+      const existing = state.dailyBlocks.find((b) => b.id === t.blockId);
+      return {
+        ...state,
+        dailyBlocks: patchBlock(state, t.blockId, {
+          actualStart: existing?.actualStart ?? startHhmm,
+          actualEnd: endHhmm,
+          plannedStart: existing?.plannedStart ?? startHhmm,
+          plannedEnd: endHhmm,
+        }),
+        timer: null,
+      };
+    });
+  },
+
+  /** 明示完了を設定（§18.2） */
+  setBlockDone(blockId: string, done: boolean): void {
+    update((state) => ({
+      ...state,
+      dailyBlocks: patchBlock(state, blockId, {
+        done: done ? true : undefined,
+      }),
+    }));
+  },
+
+  /** 繰越から破棄（完了扱いにせずトレイから外す。§18.3） */
+  dismissCarryover(blockId: string): void {
+    update((state) => ({
+      ...state,
+      dailyBlocks: patchBlock(state, blockId, { dismissed: true }),
+      timer: state.timer?.blockId === blockId ? null : state.timer,
+    }));
+  },
+
+  /**
+   * 未計画タイマー開始（§18.1）。列だけ選んで計測開始 → 停止で dailyBlocks に新規生成。
+   * 走行中の別ブロックがあれば実績を確定してから開始する。
+   */
+  startUnplannedTimer(columnId: MiraiColumnId, date: string): void {
+    if (!columnId || !date) return;
+    update((state) => {
+      const now = Date.now();
+      let dailyBlocks = state.dailyBlocks;
+      const prev = state.timer;
+      if (prev) {
+        const endHhmm = hhmmFromMs(now);
+        const startHhmm = hhmmFromMs(prev.startedAtMs);
+        const prevBlock = dailyBlocks.find((b) => b.id === prev.blockId);
+        dailyBlocks = patchBlock(state, prev.blockId, {
+          actualStart: prevBlock?.actualStart ?? startHhmm,
+          actualEnd: endHhmm,
+          plannedEnd: prevBlock?.plannedEnd ?? endHhmm,
+        });
+      }
+      const startHhmm = hhmmFromMs(now);
+      const id = `unplanned-${now}`;
+      return {
+        ...state,
+        dailyBlocks: [
+          ...dailyBlocks,
+          {
+            id,
+            date,
+            columnId,
+            plannedStart: startHhmm,
+            plannedEnd: startHhmm,
+            title: "未計画",
+          },
+        ],
+        timer: { blockId: id, startedAtMs: now },
+      };
+    });
+  },
+
+  /** 実績を手入力/修正する（空文字は未記録に戻す。§8.2） */
+  setBlockActual(blockId: string, actualStart: string, actualEnd: string): void {
+    update((state) => ({
+      ...state,
+      dailyBlocks: patchBlock(state, blockId, {
+        actualStart: actualStart || undefined,
+        actualEnd: actualEnd || undefined,
+      }),
+    }));
+  },
+
+  /** 実績をクリアして未完了に戻す（計測中なら停止扱いで破棄） */
+  clearBlockActual(blockId: string): void {
+    update((state) => ({
+      ...state,
+      dailyBlocks: patchBlock(state, blockId, {
+        actualStart: undefined,
+        actualEnd: undefined,
+      }),
+      timer: state.timer?.blockId === blockId ? null : state.timer,
+    }));
+  },
+
+  /**
+   * 繰越の「今日に載せる」（§8.4）。予定ブロックを別日へ移し、
+   * 新しい予定時刻に置く（実績はリセット。計測中なら停止）。
+   */
+  moveBlockToDate(
+    blockId: string,
+    date: string,
+    plannedStart: string,
+    plannedEnd: string,
+  ): void {
+    if (!date || !plannedStart || !plannedEnd) return;
+    update((state) => ({
+      ...state,
+      dailyBlocks: patchBlock(state, blockId, {
+        date,
+        plannedStart,
+        plannedEnd,
+        actualStart: undefined,
+        actualEnd: undefined,
+        done: undefined,
+        dismissed: undefined,
+      }),
+      timer: state.timer?.blockId === blockId ? null : state.timer,
+    }));
+  },
+
   /** 番組表の表示列を 1 つ ON/OFF する（列ピッカー。§3.3） */
   toggleColumn(columnId: MiraiColumnId): void {
     update((state) => ({
@@ -311,6 +515,43 @@ export const miraiRosterActions = {
     update((state) => ({
       ...state,
       visibleColumns: [...MIRAI_DEFAULT_VISIBLE_COLUMNS],
+    }));
+  },
+
+  /* ── ペアに振った仕事（§9） ── */
+
+  addDelegatedToPair(input: AddDelegatedInput): void {
+    if (!input.title.trim() || !input.deadline || !input.delegatedOn) return;
+    update((state) => ({
+      ...state,
+      delegatedToPair: addDelegatedItem(state.delegatedToPair, input),
+    }));
+  },
+
+  updateDelegatedStatus(id: string, status: MiraiDelegateStatus): void {
+    update((state) => ({
+      ...state,
+      delegatedToPair: updateDelegatedItemStatus(
+        state.delegatedToPair,
+        id,
+        status,
+      ),
+    }));
+  },
+
+  /** 振った側が [完了] → 別枠から削除（§9） */
+  completeDelegated(id: string): void {
+    update((state) => ({
+      ...state,
+      delegatedToPair: removeDelegatedItem(state.delegatedToPair, id),
+    }));
+  },
+
+  /** 取消（振る前に戻す） */
+  removeDelegated(id: string): void {
+    update((state) => ({
+      ...state,
+      delegatedToPair: removeDelegatedItem(state.delegatedToPair, id),
     }));
   },
 };

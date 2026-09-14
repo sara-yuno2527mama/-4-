@@ -204,6 +204,10 @@ export const miraiDailyBlockSchema = z.object({
   plannedEnd: z.string(),
   actualStart: z.string().optional(),
   actualEnd: z.string().optional(),
+  /** 明示完了（§18.2。actual があっても未完了のまま残せる） */
+  done: z.boolean().optional(),
+  /** 繰越から破棄（完了扱いにせずトレイから外す。§18.3） */
+  dismissed: z.boolean().optional(),
   title: z.string(),
   taskId: z.string().optional(),
   note: z.string().optional(),
@@ -242,17 +246,24 @@ export const miraiDelegateStatusSchema = z.enum(["todo", "doing", "done"]);
 export type MiraiDelegateStatus = z.infer<typeof miraiDelegateStatusSchema>;
 
 /** ペアに振った仕事（§9 delegatedToPair） */
-export const miraiDelegatedToPairSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  /** YYYY-MM-DD */
-  deadline: z.string(),
-  columnId: miraiColumnIdSchema.optional(),
-  note: z.string().optional(),
-  status: miraiDelegateStatusSchema,
-  /** 振った側（この人が [完了] で別枠から消える） */
-  createdBy: z.string(),
-});
+export const miraiDelegatedToPairSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    /** YYYY-MM-DD */
+    deadline: z.string(),
+    /** YYYY-MM-DD（振った日。§9.1）旧データは parse 時に deadline で補完 */
+    delegatedOn: z.string().optional(),
+    columnId: miraiColumnIdSchema.optional(),
+    note: z.string().optional(),
+    status: miraiDelegateStatusSchema,
+    /** 振った側（この人が [完了] で別枠から消える） */
+    createdBy: z.string(),
+  })
+  .transform((data) => ({
+    ...data,
+    delegatedOn: data.delegatedOn ?? data.deadline,
+  }));
 export type MiraiDelegatedToPair = z.infer<typeof miraiDelegatedToPairSchema>;
 
 /* ── §16 みらいPJ 拡張 ── */

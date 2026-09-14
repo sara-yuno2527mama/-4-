@@ -30,9 +30,13 @@ import {
   currentBusinessMonthId,
 } from "@/lib/mirai/business-month";
 import { crossCutSnapshot } from "@/lib/mirai/crosscut";
-import { MIRAI_DEFAULT_WORK_DAY } from "@/lib/mirai/program";
+import {
+  MIRAI_DEFAULT_WORK_DAY,
+  type MiraiAssignee,
+} from "@/lib/mirai/program";
 import { MiraiDomainPane } from "@/components/mirai/MiraiDomainPane";
 import { MiraiCrossCutBand } from "@/components/mirai/MiraiCrossCutBand";
+import { MiraiDelegatedStrip } from "@/components/mirai/MiraiDelegatedStrip";
 import { MiraiProgramTablePane } from "@/components/mirai/MiraiProgramTablePane";
 import { MiraiQuickInputSection } from "@/components/mirai/MiraiQuickInputSection";
 import { MiraiMonthMemoSection } from "@/components/mirai/MiraiMonthMemoSection";
@@ -78,10 +82,11 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
     useState(defaultAnnualMonthId);
   const [selectedShidaiId, setSelectedShidaiId] = useState<string | null>(null);
   const [mainView, setMainView] = useState<MiraiMainView>("domains");
+  /** 端末ロール（主/ペア。§18 軽量識別） */
+  const [deviceRole, setDeviceRole] = useState<MiraiAssignee>("主");
 
   const workDaySettings =
     initialDashboard.workDaySettings ?? MIRAI_DEFAULT_WORK_DAY;
-  const dailyBlocks = initialDashboard.dailyBlocks ?? [];
 
   const isCommitteeMode = selectedDomainId === MIRAI_COMMITTEE_DOMAIN_ID;
   const isSoumuMode = selectedDomainId === MIRAI_SOUMU_DOMAIN_ID;
@@ -314,13 +319,21 @@ export function MiraiWorkspace({ initialDashboard }: MiraiWorkspaceProps) {
 
         <MiraiCrossCutBand snapshot={crossCut} />
 
+        <MiraiDelegatedStrip
+          items={roster.delegatedToPair}
+          deviceRole={deviceRole}
+          asOfDate={asOfDate}
+          actions={miraiRosterActions}
+        />
+
         {mainView === "program" ? (
           <MiraiProgramTablePane
             roster={roster}
             actions={miraiRosterActions}
             settings={workDaySettings}
-            dailyBlocks={dailyBlocks}
             asOfDate={asOfDate}
+            deviceRole={deviceRole}
+            onDeviceRoleChange={setDeviceRole}
           />
         ) : (
           <div className={miraiPanesRowClassName}>

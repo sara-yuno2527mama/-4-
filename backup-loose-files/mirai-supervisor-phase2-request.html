@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <link rel="canonical" href="https://diagram-mirai-supervisor-phase2.surge.sh/" />
+  <title>Phase1 + Phase2 = 仕組みの完成（みらいプロジェクト）</title>
+  <style>
+    :root {
+      --ink: #0b1220;
+      --ink-soft: #334155;
+      --muted: #64748b;
+      --paper: #f4f6fb;
+      --surface: #ffffff;
+      --line: #e6eaf2;
+      --teal: #0f766e;
+      --teal-strong: #115e59;
+      --teal-soft: #ccfbf1;
+      --teal-bg: #ecfdf5;
+      --indigo: #4338ca;
+      --indigo-soft: #c7d2fe;
+      --amber: #c2410c;
+      --amber-soft: #ffedd5;
+      --amber-bg: #fff7ed;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body {
+      margin: 0;
+      font-family: "Helvetica Neue", "Segoe UI", "Meiryo", "Yu Gothic UI", "MS PGothic", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.6;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== Page ===== */
+    main {
+      max-width: 200mm;
+      margin: 0 auto;
+      padding: 12mm 14mm 14mm;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 18px 0 24px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+    .eyebrow {
+      margin: 0 0 14px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      margin: 0 0 16px;
+      font-size: 26pt;
+      font-weight: 900;
+      line-height: 1.18;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .hero h1 .ph { color: var(--teal); }
+    .hero h1 .op {
+      color: var(--indigo);
+      font-weight: 700;
+      font-size: 0.85em;
+    }
+    .hero h1 .goal {
+      color: #fff;
+      background: linear-gradient(180deg, var(--teal), var(--teal-strong));
+      padding: 2px 16px;
+      border-radius: 10px;
+    }
+    .hero p.lede {
+      margin: 0 auto;
+      max-width: 580px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+    .hero p.lede strong { color: var(--ink); }
+    .hero p.lede .warn { color: var(--amber); font-weight: 800; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 22px 24px 20px;
+      margin: 0 0 16px;
+    }
+    .card h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 14px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .card h2::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+    .card.card--compare h2::before { background: var(--indigo); }
+    .card.card--timing h2::before { background: var(--amber); }
+    .card .lead {
+      margin: -4px 0 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .svg-wrap { width: 100%; }
+    .svg-wrap svg { display: block; width: 100%; height: auto; }
+
+    ul.notes {
+      list-style: none;
+      margin: 14px 0 0;
+      padding: 0;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    ul.notes li {
+      padding-left: 1em;
+      text-indent: -1em;
+      margin-bottom: 4px;
+    }
+    ul.notes li::before {
+      content: "・";
+      color: var(--line);
+      font-weight: 700;
+      margin-right: 4px;
+    }
+    ul.notes strong { color: var(--ink); }
+
+    footer {
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 14px;
+    }
+
+    /* ===== Print ===== */
+    @page { size: A4 portrait; margin: 12mm; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff; font-size: 10.5pt; }
+      main { max-width: none; padding: 0; }
+      .hero { padding-top: 0; }
+      .hero h1 { font-size: 22pt; }
+      .card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .card.card--compare { page-break-before: always; }
+      footer { font-size: 9pt; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <p class="eyebrow">みらいプロジェクト 事務局 / 社内共有</p>
+      <h1>
+        <span class="ph">Phase1</span>
+        <span class="op" aria-hidden="true">＋</span>
+        <span class="ph">Phase2</span>
+        <span class="op" aria-hidden="true">＝</span>
+        <span class="goal">仕組みの完成</span>
+      </h1>
+      <p class="lede">
+        この2つを <strong>今期のうちに</strong> 進めます。<br />
+        <span class="warn">来期にまとめると</span>、漏れや手作業が続きます。
+      </p>
+    </header>
+
+    <!-- Page 1 -->
+    <section class="card card--equation">
+      <h2>2つで完成する</h2>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Phase1とPhase2の足し算で仕組みが完成する">
+          <!-- Phase1 -->
+          <rect x="14" y="38" width="190" height="124" rx="14" fill="#0f766e"/>
+          <text x="109" y="74" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="3" fill="#ccfbf1">PHASE 1</text>
+          <text x="109" y="108" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff">申込・台帳</text>
+          <text x="109" y="138" text-anchor="middle" font-size="12" font-weight="700" fill="#ccfbf1">入口を整える</text>
+
+          <!-- + -->
+          <text x="227" y="116" text-anchor="middle" font-size="44" font-weight="900" fill="#c7d2fe">＋</text>
+
+          <!-- Phase2 -->
+          <rect x="252" y="38" width="190" height="124" rx="14" fill="#115e59"/>
+          <text x="347" y="74" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="3" fill="#ccfbf1">PHASE 2</text>
+          <text x="347" y="108" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff">提出・連携</text>
+          <text x="347" y="138" text-anchor="middle" font-size="12" font-weight="700" fill="#ccfbf1">出口を一本に</text>
+
+          <!-- = -->
+          <text x="466" y="115" text-anchor="middle" font-size="40" font-weight="900" fill="#c7d2fe">＝</text>
+
+          <!-- Result -->
+          <rect x="490" y="32" width="200" height="136" rx="14" fill="#ecfdf5" stroke="#0f766e" stroke-width="3"/>
+          <text x="590" y="70" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="3" fill="#0f766e">RESULT</text>
+          <text x="590" y="106" text-anchor="middle" font-size="22" font-weight="900" fill="#065f46">仕組みの完成</text>
+          <text x="590" y="136" text-anchor="middle" font-size="12" font-weight="700" fill="#0f766e">申込から掲載まで</text>
+          <text x="590" y="154" text-anchor="middle" font-size="12" font-weight="700" fill="#0f766e">一本でつながる</text>
+
+          <!-- Footer caption -->
+          <line x1="60" y1="200" x2="640" y2="200" stroke="#e2e8f0" stroke-width="1"/>
+          <text x="350" y="222" text-anchor="middle" font-size="13" font-weight="800" fill="#0f172a">今期のうちに、この2つを進める</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Page 2 -->
+    <section class="card card--compare">
+      <h2>いま と これから</h2>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ビフォーアフター。バラバラから一本へ">
+          <!-- Before -->
+          <rect x="0" y="0" width="338" height="220" rx="14" fill="#fff7ed"/>
+          <text x="169" y="34" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="3" fill="#9a3412">BEFORE</text>
+          <text x="169" y="60" text-anchor="middle" font-size="20" font-weight="900" fill="#7c2d12">届け方がバラバラ</text>
+
+          <rect x="32" y="86" width="80" height="28" rx="7" fill="#fff" stroke="#fb923c" stroke-width="1.5"/>
+          <text x="72" y="105" text-anchor="middle" font-size="11" font-weight="700" fill="#9a3412">メール</text>
+          <rect x="124" y="100" width="92" height="28" rx="7" fill="#fff" stroke="#fb923c" stroke-width="1.5"/>
+          <text x="170" y="119" text-anchor="middle" font-size="11" font-weight="700" fill="#9a3412">複数フォルダ</text>
+          <rect x="226" y="86" width="80" height="28" rx="7" fill="#fff" stroke="#fb923c" stroke-width="1.5"/>
+          <text x="266" y="105" text-anchor="middle" font-size="11" font-weight="700" fill="#9a3412">紙メモ</text>
+
+          <text x="169" y="178" text-anchor="middle" font-size="38" font-weight="900" fill="#ea580c">✕</text>
+          <text x="169" y="202" text-anchor="middle" font-size="11" font-weight="800" fill="#7c2d12">反映漏れ・確認に時間</text>
+
+          <!-- After -->
+          <rect x="362" y="0" width="338" height="220" rx="14" fill="#ecfdf5"/>
+          <text x="531" y="34" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="3" fill="#0f766e">AFTER</text>
+          <text x="531" y="60" text-anchor="middle" font-size="20" font-weight="900" fill="#065f46">一本にして、その場で確認</text>
+
+          <rect x="402" y="86" width="64" height="26" rx="7" fill="#fff" stroke="#0f766e" stroke-width="1.5"/>
+          <text x="434" y="103" text-anchor="middle" font-size="10" font-weight="700" fill="#065f46">作文</text>
+          <rect x="498" y="86" width="64" height="26" rx="7" fill="#fff" stroke="#0f766e" stroke-width="1.5"/>
+          <text x="530" y="103" text-anchor="middle" font-size="10" font-weight="700" fill="#065f46">広告</text>
+          <rect x="594" y="86" width="64" height="26" rx="7" fill="#fff" stroke="#0f766e" stroke-width="1.5"/>
+          <text x="626" y="103" text-anchor="middle" font-size="10" font-weight="700" fill="#065f46">CM</text>
+
+          <path d="M434 116 L434 134 L526 134" stroke="#0f766e" stroke-width="2" fill="none"/>
+          <path d="M530 116 L530 134" stroke="#0f766e" stroke-width="2" fill="none"/>
+          <path d="M626 116 L626 134 L534 134" stroke="#0f766e" stroke-width="2" fill="none"/>
+          <polygon points="525,134 535,134 530,146" fill="#0f766e"/>
+
+          <rect x="450" y="148" width="162" height="34" rx="9" fill="#0f766e"/>
+          <text x="531" y="170" text-anchor="middle" font-size="13" font-weight="900" fill="#ffffff">受付・確認の一本化</text>
+
+          <text x="531" y="202" text-anchor="middle" font-size="11" font-weight="800" fill="#065f46">届く・残る・直しやすい</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="card card--timing">
+      <h2>今期のうちに</h2>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 700 88" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="今期のあいだに進める">
+          <text x="40" y="20" font-size="10" font-weight="800" letter-spacing="3" fill="#0f766e">今期</text>
+
+          <rect x="40" y="38" width="620" height="14" rx="7" fill="#e6fffa"/>
+          <rect x="160" y="34" width="380" height="22" rx="11" fill="#0f766e"/>
+          <text x="350" y="49" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">Phase1 + Phase2 はこの帯のあいだに</text>
+
+          <circle cx="60" cy="45" r="6" fill="#fff" stroke="#0f766e" stroke-width="2"/>
+          <text x="60" y="76" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">4月</text>
+
+          <circle cx="350" cy="45" r="7" fill="#0f766e"/>
+          <text x="350" y="76" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">11月 発表会</text>
+
+          <circle cx="640" cy="45" r="6" fill="#fff" stroke="#0f766e" stroke-width="2"/>
+          <text x="640" y="76" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">3月</text>
+        </svg>
+      </div>
+    </section>
+
+    <ul class="notes">
+      <li><strong>Phase1</strong>＝申込・台帳・受付。<strong>Phase2</strong>＝提出・連携。</li>
+      <li>金額・範囲・条件は<strong>お見積書面</strong>が正です。本資料は社内整理の案。</li>
+    </ul>
+
+    <footer>みらいプロジェクト 事務局（案）／ A4 縦・2枚で印刷</footer>
+  </main>
+</body>
+</html>

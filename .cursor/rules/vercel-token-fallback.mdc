@@ -1,0 +1,36 @@
+---
+description: Vercel「許可して」失敗時はトークン手順を案内する
+alwaysApply: true
+---
+
+# Vercel CLI デバイス認可が失敗したら
+
+`vercel login` の「許可して」／デバイス認可がエラーになることがある（ブラウザが関係ないドキュメントに飛ぶ等）。
+
+## そのときやること
+
+1. **`vercel login` をやり直さない**（同じ失敗を繰り返さない）
+2. 次のどちらかで公開URLを出す（テンプレート新規作成はしない）
+
+### 優先: トークン（ダッシュボード）
+
+ユーザーに次を案内する:
+
+1. https://vercel.com/account/tokens で Create → トークンをコピー（チャットに貼らない）
+2. PowerShell:
+
+```powershell
+$env:VERCEL_TOKEN="ここにトークン"
+cd C:\Users\o9o15\src\ai-kitchen-secretary
+npx vercel deploy --yes --prod --token $env:VERCEL_TOKEN
+```
+
+ユーザーが「トークン用意した」と言ったら、貼らせずにデプロイを進める（環境変数や手元入力を想定）。
+
+### 代替: GitHub → Vercel Import
+
+リポジトリを push 済みなら、ダッシュボードの **Import**（テンプレート新規は禁止）で既存リポジトリを繋ぐ。
+
+## 本番URLの目安
+
+既存プロジェクト: https://ai-kitchen-secretary.vercel.app

@@ -1,0 +1,6 @@
+.next
+out
+.tmp-static
+.cursor
+data/*.json
+node_modules

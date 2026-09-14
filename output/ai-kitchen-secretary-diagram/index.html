@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="AIキッチン秘書 — 企画図解">
+  <meta property="og:description" content="忙しい家庭の小さな罪悪感を減らす。料理は自分で、管理はAIと一緒に。企画の背景から完成のイメージまでを図解します。">
+  <meta property="og:type" content="article">
+  <title>AIキッチン秘書 — 企画図解</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF',
+              surface: '#F8FAFC',
+              hover: '#F1F5F9',
+              border: '#E2E8F0',
+              accent: '#3B82F6',
+              'accent-light': '#2563EB',
+              text: '#1E293B',
+              muted: '#64748B',
+              dim: '#94A3B8',
+              positive: '#10B981',
+              negative: '#EF4444',
+              warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl { break-inside: avoid; }
+      .md\:flex-row { flex-direction: row !important; }
+      .md\:hidden { display: none !important; }
+      .hidden.md\:block { display: block !important; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .md\:mb-20 { margin-bottom: 5rem !important; }
+      .md\:py-16 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+      .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        color: #2563EB !important;
+        -webkit-text-fill-color: #2563EB !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+      PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+<!-- CONTENT_START -->
+
+<!-- HERO -->
+<div class="text-center mb-8 md:mb-10">
+  <div class="inline-flex items-center gap-2 bg-ads-accent/10 text-ads-accent-light px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+    <i data-lucide="sparkles" class="w-4 h-4"></i>
+    AI活用企画
+  </div>
+  <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
+    <span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">AIキッチン秘書</span>
+  </h1>
+  <p class="text-base md:text-lg text-ads-muted max-w-xl mx-auto leading-relaxed mb-2">
+    料理は自分で、管理はAIと一緒に
+  </p>
+  <p class="text-sm text-ads-dim max-w-lg mx-auto leading-relaxed">
+    忙しいのに頑張っているのに、思い通りにできなくて溜まる小さな罪悪感。<br class="hidden sm:inline">
+    その「管理の負担」だけを、責めないAIが支える企画です。
+  </p>
+</div>
+
+<!-- ONE-PAGE SUMMARY -->
+<div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-10 mb-6">
+  <div class="text-center mb-8 md:mb-10">
+    <p class="text-xl md:text-2xl font-black text-slate-900 mb-2">
+      AIは<span class="text-ads-accent-light">代行者ではなく、伴走パートナー</span>
+    </p>
+    <p class="text-sm text-ads-muted">
+      手作りの喜びはそのまま。忘れる・余る・バタバタする、管理だけを支える
+    </p>
+  </div>
+
+  <div class="flex flex-col md:flex-row items-stretch justify-center gap-3 md:gap-2 mb-8">
+    <div class="flex-1 flex flex-col items-center p-4 bg-white border border-ads-border rounded-xl">
+      <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="heart-crack" class="w-6 h-6 text-rose-500"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm text-center">小さな罪悪感</div>
+      <div class="text-[11px] text-ads-muted mt-1 text-center">余り・買いすぎ・準備遅れ</div>
+    </div>
+    <div class="flex items-center justify-center md:px-1">
+      <i data-lucide="arrow-right" class="w-5 h-5 text-ads-accent hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent md:hidden"></i>
+    </div>
+    <div class="flex-1 flex flex-col items-center p-4 bg-ads-accent/5 border-2 border-ads-accent/25 rounded-xl">
+      <div class="w-14 h-14 rounded-2xl bg-ads-accent/15 border-2 border-ads-accent/30 flex items-center justify-center mb-2.5">
+        <i data-lucide="bot" class="w-7 h-7 text-ads-accent-light"></i>
+      </div>
+      <div class="font-bold text-ads-accent-light text-sm text-center">AIキッチン秘書</div>
+      <div class="text-[11px] text-ads-muted mt-1 text-center">定番・在庫・先回り通知</div>
+    </div>
+    <div class="flex items-center justify-center md:px-1">
+      <i data-lucide="arrow-right" class="w-5 h-5 text-emerald-500 hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-5 h-5 text-emerald-500 md:hidden"></i>
+    </div>
+    <div class="flex-1 flex flex-col items-center p-4 bg-white border border-emerald-500/25 rounded-xl">
+      <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="cooking-pot" class="w-6 h-6 text-emerald-600"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm text-center">手作りの食卓</div>
+      <div class="text-[11px] text-ads-muted mt-1 text-center">料理の楽しさは自分の手で</div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-4 mb-6">
+    <div class="flex-1 border-t border-ads-border/50"></div>
+    <div class="text-[11px] text-ads-dim font-medium">背景にある3つのモヤモヤ</div>
+    <div class="flex-1 border-t border-ads-border/50"></div>
+  </div>
+
+  <div class="flex flex-wrap justify-center gap-2">
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="refrigerator" class="w-3.5 h-3.5 text-rose-500"></i>
+      作り置きが余る
+    </div>
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="shopping-cart" class="w-3.5 h-3.5 text-amber-500"></i>
+      あるのにまた買う
+    </div>
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="alarm-clock" class="w-3.5 h-3.5 text-blue-500"></i>
+      定番なのに前日準備できない
+    </div>
+  </div>
+</div>
+
+<p class="text-center text-ads-muted mb-16 md:mb-20">
+  ここから、背景・社会課題・コンセプト・製品の核、そして完成のイメージを順に見ていきます。
+</p>
+
+<!-- SECTION: 背景 -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+      <i data-lucide="message-circle-heart" class="w-5 h-5 text-rose-500"></i>
+    </div>
+    <h2 class="text-2xl font-black text-slate-900">企画の背景</h2>
+  </div>
+
+  <p class="mb-6 text-ads-muted">
+    課題の中心は「レシピが思いつかない」ことではありません。
+    <span class="font-bold text-slate-800">頑張っているのに思い通りにできない</span>ことから来る、日々の小さな罪悪感の積み重ねです。
+  </p>
+
+  <div class="grid gap-4">
+    <div class="bg-white border border-ads-border rounded-xl p-5">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
+          <i data-lucide="soup" class="w-4.5 h-4.5 text-rose-500"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-1">作り置きが食べきれない</h3>
+          <p class="text-sm text-ads-muted">味噌汁や煮物を頑張って作ったのに、冷蔵庫に残り「また余らせた」と感じる。</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white border border-ads-border rounded-xl p-5">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+          <i data-lucide="package" class="w-4.5 h-4.5 text-amber-500"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-1">届いた食材を忘れて二重買い</h3>
+          <p class="text-sm text-ads-muted">宅配で頼んだ食材があるのに存在を忘れ、また買ってしまう。</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white border border-ads-border rounded-xl p-5">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+          <i data-lucide="calendar-days" class="w-4.5 h-4.5 text-blue-500"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-1">定番リズムがあるのに前日準備できない</h3>
+          <p class="text-sm text-ads-muted">平日はおにぎり、土曜は卵サンド——分かっているのに忙しくて前日に仕込めず、当日バタバタする。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 bg-ads-accent/5 border border-ads-accent/15 rounded-xl p-5">
+    <p class="text-sm text-slate-700 leading-relaxed">
+      <span class="font-bold text-ads-accent-light">だから欲しいのは「代わりに料理してくれるAI」ではない。</span>
+      手作りの楽しさはそのままに、<span class="font-bold">管理の負担だけ</span>を支えてくれる存在です。
+    </p>
+  </div>
+</section>
+
+<!-- SECTION: 社会課題の数字 -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+      <i data-lucide="bar-chart-3" class="w-5 h-5 text-amber-500"></i>
+    </div>
+    <h2 class="text-2xl font-black text-slate-900">個人のモヤモヤは、社会課題でもある</h2>
+  </div>
+
+  <p class="mb-6 text-ads-muted">
+    「また余らせた」「また買いすぎた」は家庭の中の話ですが、日本全体では食品ロス（まだ食べられるのに捨てられる食品）として大きな数字になっています。
+  </p>
+
+  <div class="grid sm:grid-cols-3 gap-3 mb-6">
+    <div class="bg-white border border-ads-border rounded-xl p-5 text-center">
+      <div class="text-3xl font-black text-rose-500 mb-1">461</div>
+      <div class="text-xs font-bold text-slate-800 mb-1">万トン</div>
+      <div class="text-[11px] text-ads-muted">2024年度の食品ロス推計（全体）</div>
+    </div>
+    <div class="bg-white border border-ads-border rounded-xl p-5 text-center">
+      <div class="text-3xl font-black text-amber-500 mb-1">224</div>
+      <div class="text-xs font-bold text-slate-800 mb-1">万トン</div>
+      <div class="text-[11px] text-ads-muted">うち家庭から発生した分</div>
+    </div>
+    <div class="bg-white border border-ads-border rounded-xl p-5 text-center">
+      <div class="text-3xl font-black text-slate-800 mb-1">3.8</div>
+      <div class="text-xs font-bold text-slate-800 mb-1">兆円</div>
+      <div class="text-[11px] text-ads-muted">食品ロスによる経済損失（推計）</div>
+    </div>
+  </div>
+  <p class="text-xs text-ads-dim mb-6">
+    出典:
+    <a href="https://www.caa.go.jp/notice/entry/046549/" class="underline hover:text-ads-accent" target="_blank" rel="noopener">消費者庁（2024年度食品ロス量の公表）</a>
+    ／
+    <a href="https://www.nikkei.com/article/DGXZQOUA294HN0Z20C26A6000000/" class="underline hover:text-ads-accent" target="_blank" rel="noopener">日経新聞（同推計の報道）</a>
+  </p>
+
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+    <h3 class="font-bold text-slate-900 mb-3 text-sm">家庭で起きやすいパターン</h3>
+    <div class="grid sm:grid-cols-2 gap-3">
+      <div class="flex items-start gap-2 text-sm text-ads-muted">
+        <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 shrink-0 mt-0.5"></i>
+        <span>買いすぎ・在庫の見失いによる傷み・期限切れ</span>
+      </div>
+      <div class="flex items-start gap-2 text-sm text-ads-muted">
+        <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 shrink-0 mt-0.5"></i>
+        <span>作りすぎ・食べ残し（作り置きの余りを含む）</span>
+      </div>
+    </div>
+    <p class="text-xs text-ads-dim mt-3">
+      出典例:
+      <a href="https://www.caa.go.jp/policies/policy/consumer_policy/information/food_loss/efforts/" class="underline hover:text-ads-accent" target="_blank" rel="noopener">消費者庁 食品ロス関連取組</a>
+    </p>
+  </div>
+</section>
+
+<!-- SECTION: Before / After コンセプト -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 rounded-xl bg-ads-accent/10 border border-ads-accent/20 flex items-center justify-center">
+      <i data-lucide="git-compare" class="w-5 h-5 text-ads-accent-light"></i>
+    </div>
+    <h2 class="text-2xl font-black text-slate-900">Before → After</h2>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-4">
+    <div class="bg-white border border-rose-200 rounded-xl overflow-hidden">
+      <div class="bg-rose-500/10 px-4 py-2.5 border-b border-rose-200 flex items-center gap-2">
+        <i data-lucide="x" class="w-4 h-4 text-rose-500"></i>
+        <span class="text-sm font-bold text-rose-700">今（バラバラ管理）</span>
+      </div>
+      <ul class="p-4 space-y-2.5 text-sm text-ads-muted">
+        <li class="flex gap-2"><span class="text-rose-400">•</span>献立・在庫・買い物・予定が別々</li>
+        <li class="flex gap-2"><span class="text-rose-400">•</span>「また余らせた」が積み重なる</li>
+        <li class="flex gap-2"><span class="text-rose-400">•</span>定番があるのに先回りできない</li>
+        <li class="flex gap-2"><span class="text-rose-400">•</span>自分を責めてしまう</li>
+      </ul>
+    </div>
+    <div class="bg-white border border-emerald-200 rounded-xl overflow-hidden">
+      <div class="bg-emerald-500/10 px-4 py-2.5 border-b border-emerald-200 flex items-center gap-2">
+        <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
+        <span class="text-sm font-bold text-emerald-700">AIキッチン秘書</span>
+      </div>
+      <ul class="p-4 space-y-2.5 text-sm text-ads-muted">
+        <li class="flex gap-2"><span class="text-emerald-500">•</span>定番・在庫・リマインドを家庭で共有</li>
+        <li class="flex gap-2"><span class="text-emerald-500">•</span>余りを「明日使える食材」として扱う</li>
+        <li class="flex gap-2"><span class="text-emerald-500">•</span>前日夜・当日朝に先回り通知</li>
+        <li class="flex gap-2"><span class="text-emerald-500">•</span>責めず、手作りを続けられる設計</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: 差別化 -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+      <i data-lucide="waypoints" class="w-5 h-5 text-violet-500"></i>
+    </div>
+    <h2 class="text-2xl font-black text-slate-900">よくある献立AIとの違い</h2>
+  </div>
+
+  <p class="mb-6 text-ads-muted">
+    世の中には「今日何作る？」をAIが提案するアプリが増えています（クラシルのAI献立、冷蔵庫連動のpeccoなど）。この企画の軸はそこではありません。
+  </p>
+  <p class="text-xs text-ads-dim mb-6">
+    出典例:
+    <a href="https://www.perfectcorp.com/ja/consumer/blog/ai-chat/ai-menu-app-ja" class="underline hover:text-ads-accent" target="_blank" rel="noopener">AI献立アプリの比較記事</a>
+  </p>
+
+  <div class="overflow-hidden border border-ads-border rounded-xl">
+    <div class="grid grid-cols-3 bg-ads-surface text-xs font-bold text-slate-700 border-b border-ads-border">
+      <div class="p-3">観点</div>
+      <div class="p-3 border-l border-ads-border">よくある献立AI</div>
+      <div class="p-3 border-l border-ads-border text-ads-accent-light">この企画</div>
+    </div>
+    <div class="grid grid-cols-3 text-xs text-ads-muted border-b border-ads-border">
+      <div class="p-3 font-medium text-slate-800">主目的</div>
+      <div class="p-3 border-l border-ads-border">新しい献立の提案</div>
+      <div class="p-3 border-l border-ads-border bg-ads-accent/5">定番リズムと在庫の管理支援</div>
+    </div>
+    <div class="grid grid-cols-3 text-xs text-ads-muted border-b border-ads-border">
+      <div class="p-3 font-medium text-slate-800">AIの役割</div>
+      <div class="p-3 border-l border-ads-border">料理人・プランナー</div>
+      <div class="p-3 border-l border-ads-border bg-ads-accent/5">責めない秘書・伴走者</div>
+    </div>
+    <div class="grid grid-cols-3 text-xs text-ads-muted">
+      <div class="p-3 font-medium text-slate-800">レシピ</div>
+      <div class="p-3 border-l border-ads-border">AIが生成・提案</div>
+      <div class="p-3 border-l border-ads-border bg-ads-accent/5">在庫から外部検索（自分で選ぶ）</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: MVP -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+      <i data-lucide="package-check" class="w-5 h-5 text-emerald-600"></i>
+    </div>
+    <h2 class="text-2xl font-black text-slate-900">この企画の核（MVP）</h2>
+  </div>
+
+  <p class="mb-6 text-ads-muted">
+    MVP（Minimum Viable Product＝価値を確かめられる核となる製品）は、背景の3モヤモヤに直撃する機能に絞っています。
+  </p>
+
+  <div class="grid sm:grid-cols-2 gap-3 mb-6">
+    <div class="bg-white border border-ads-border rounded-xl p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="repeat" class="w-4 h-4 text-blue-500"></i>
+        <h3 class="font-bold text-slate-900 text-sm">定番リズム</h3>
+      </div>
+      <p class="text-xs text-ads-muted">曜日テンプレ＋例外日（平日おにぎり、土曜卵サンドなど）</p>
+    </div>
+    <div class="bg-white border border-ads-border rounded-xl p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="boxes" class="w-4 h-4 text-amber-500"></i>
+        <h3 class="font-bold text-slate-900 text-sm">在庫メモ</h3>
+      </div>
+      <p class="text-xs text-ads-muted">名前・種類・数量・使い切り目安・写真（読取＋手入力）</p>
+    </div>
+    <div class="bg-white border border-ads-border rounded-xl p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="bell-ring" class="w-4 h-4 text-rose-500"></i>
+        <h3 class="font-bold text-slate-900 text-sm">先回りリマインド</h3>
+      </div>
+      <p class="text-xs text-ads-muted">前日20:00（定番）／当日7:00（使い切り）をLINEで通知</p>
+    </div>
+    <div class="bg-white border border-ads-border rounded-xl p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="search" class="w-4 h-4 text-emerald-600"></i>
+        <h3 class="font-bold text-slate-900 text-sm">レシピ検索ボタン</h3>
+      </div>
+      <p class="text-xs text-ads-muted">在庫／余りからCookpad・クラシル等を選択して検索</p>
+    </div>
+  </div>
+
+  <!-- Notification mock -->
+  <div class="bg-slate-900 rounded-2xl p-4 md:p-5 mb-6">
+    <div class="text-[10px] text-slate-400 mb-3 flex items-center gap-1.5">
+      <i data-lucide="smartphone" class="w-3 h-3"></i>
+      LINE通知のイメージ
+    </div>
+    <div class="space-y-2.5">
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 max-w-sm">
+        <div class="text-[10px] text-emerald-400 mb-1">前日 20:00</div>
+        <p class="text-sm text-slate-100 leading-relaxed">明日はお弁当の日です。ご飯を多めに炊きますか？</p>
+      </div>
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 max-w-sm">
+        <div class="text-[10px] text-amber-400 mb-1">当日 7:00</div>
+        <p class="text-sm text-slate-100 leading-relaxed">冷蔵庫の「煮物」を使い切りたい日です。レシピを探しますか？</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+    <h3 class="font-bold text-slate-900 text-sm mb-3">広げられること</h3>
+    <div class="flex flex-wrap gap-2">
+      <span class="text-[11px] bg-white border border-ads-border rounded-full px-3 py-1 text-ads-muted">本格献立生成AI</span>
+      <span class="text-[11px] bg-white border border-ads-border rounded-full px-3 py-1 text-ads-muted">家計簿・予算アラート</span>
+      <span class="text-[11px] bg-white border border-ads-border rounded-full px-3 py-1 text-ads-muted">カレンダー本連携</span>
+      <span class="text-[11px] bg-white border border-ads-border rounded-full px-3 py-1 text-ads-muted">音声操作</span>
+      <span class="text-[11px] bg-white border border-ads-border rounded-full px-3 py-1 text-ads-muted">買い物リスト専用画面</span>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: 画面 -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+      <i data-lucide="layout-dashboard" class="w-5 h-5 text-cyan-600"></i>
+    </div>
+    <h2 class="text-2xl font-black text-slate-900">完成のイメージ</h2>
+  </div>
+
+  <p class="mb-3 text-ads-muted leading-relaxed">
+    <span class="font-bold text-slate-800">料理は自分で、管理はAIと一緒に。</span>
+    下タブは <span class="font-bold text-slate-800">ホーム／献立／今ある／追加／設定</span>。
+  </p>
+
+  <a href="https://ai-kitchen-secretary.vercel.app" target="_blank" rel="noopener noreferrer"
+     class="mb-2 inline-flex items-center gap-2 bg-[#2F9E44]/10 text-[#2F9E44] border border-[#2F9E44]/25 rounded-full px-4 py-2 text-sm font-bold">
+    <i data-lucide="external-link" class="w-4 h-4"></i>
+    公開アプリを開く
+  </a>
+  <p class="mb-6 text-xs text-ads-dim break-all">https://ai-kitchen-secretary.vercel.app</p>
+
+  <div class="flex flex-wrap justify-center gap-2 mb-6">
+    <span class="bg-[#2F9E44] text-white text-[11px] font-bold rounded-full px-3 py-1">ホーム</span>
+    <span class="bg-white border border-ads-border text-[11px] font-bold text-slate-700 rounded-full px-3 py-1">献立</span>
+    <span class="bg-white border border-ads-border text-[11px] font-bold text-slate-700 rounded-full px-3 py-1">今ある</span>
+    <span class="bg-white border border-ads-border text-[11px] font-bold text-slate-700 rounded-full px-3 py-1">追加</span>
+    <span class="bg-white border border-ads-border text-[11px] font-bold text-slate-700 rounded-full px-3 py-1">設定</span>
+  </div>
+
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-5 mb-6">
+    <h3 class="font-bold text-slate-900 text-sm mb-3">画面の決まり</h3>
+    <ul class="space-y-2 text-sm text-ads-muted">
+      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i><span>ホーム：日付＋家族写真、献立提案（朝夕）をすっきり表示、おすすめ写真、日付の前後切替</span></li>
+      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i><span>土日夕の初期表示は「実家（パス）」（空・未設定にしない）</span></li>
+      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i><span>「実家（パス）」はどの日の朝・夕でも選択可</span></li>
+      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i><span>共通：実家（パス）→その表示のみ／家で作る→提案</span></li>
+      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i><span>編集の先：差し替え・外食・調達（買って家で食べる）・定番店・記録編集。本線は家で作る</span></li>
+      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i><span>レシピ読取：①写真を選ぶ／②サンプル写真で試す</span></li>
+    </ul>
+  </div>
+
+  <div class="mb-3 flex flex-wrap items-center gap-2">
+    <span class="text-xs font-bold bg-cyan-500/10 text-cyan-700 border border-cyan-500/20 rounded-full px-3 py-1">公開アプリ · 8/28（金）</span>
+    <a href="https://ai-kitchen-secretary.vercel.app/" target="_blank" rel="noopener noreferrer" class="text-xs text-ads-accent-light underline">アプリを開く</a>
+  </div>
+  <p class="mb-6 text-xs text-ads-dim leading-relaxed">
+    下の5画面は、<a href="https://ai-kitchen-secretary.vercel.app/" class="underline">公開アプリ</a>を 8/28（金）で撮ったものです。
+    オイシックスは、定期で届く食材宅配サービスです。
+  </p>
+
+  <div class="grid sm:grid-cols-2 gap-5 mb-2 justify-items-center">
+    <div class="w-full max-w-[260px]">
+      <p class="mb-2 text-center text-xs font-bold text-slate-900">1. ホーム</p>
+      <p class="mb-2 text-center text-[11px] text-ads-muted">日付＋家族写真・朝夕・おすすめ・日付切替</p>
+      <div class="rounded-[1.4rem] border border-[#212529]/20 bg-[#212529] p-1">
+        <img src="shots/home.png" alt="ホーム画面（8/28）" class="w-full rounded-[1.1rem]" />
+      </div>
+    </div>
+    <div class="w-full max-w-[260px]">
+      <p class="mb-2 text-center text-xs font-bold text-slate-900">2. 献立</p>
+      <p class="mb-2 text-center text-[11px] text-ads-muted">金 8/28・実家（パス）／家で作る</p>
+      <div class="rounded-[1.4rem] border border-[#212529]/20 bg-[#212529] p-1">
+        <img src="shots/meals.png" alt="献立画面（8/28）" class="w-full rounded-[1.1rem]" />
+      </div>
+    </div>
+    <div class="w-full max-w-[260px]">
+      <p class="mb-2 text-center text-xs font-bold text-slate-900">3. 今ある</p>
+      <p class="mb-2 text-center text-[11px] text-ads-muted">冷蔵庫まわりの一覧と使用期限</p>
+      <div class="rounded-[1.4rem] border border-[#212529]/20 bg-[#212529] p-1">
+        <img src="shots/inventory.png" alt="今ある画面" class="w-full rounded-[1.1rem]" />
+      </div>
+    </div>
+    <div class="w-full max-w-[260px]">
+      <p class="mb-2 text-center text-xs font-bold text-slate-900">4. 追加</p>
+      <p class="mb-2 text-center text-[11px] text-ads-muted">写真／名前／音声・宅配の取込</p>
+      <div class="rounded-[1.4rem] border border-[#212529]/20 bg-[#212529] p-1">
+        <img src="shots/bought.png" alt="追加画面" class="w-full rounded-[1.1rem]" />
+      </div>
+    </div>
+    <div class="w-full max-w-[260px] sm:col-span-2">
+      <p class="mb-2 text-center text-xs font-bold text-slate-900">5. 設定</p>
+      <p class="mb-2 text-center text-[11px] text-ads-muted">家族写真・家庭・通知</p>
+      <div class="rounded-[1.4rem] border border-[#212529]/20 bg-[#212529] p-1 mx-auto max-w-[260px]">
+        <img src="shots/settings.png" alt="設定画面" class="w-full rounded-[1.1rem]" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: 届け方 -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+      <i data-lucide="users" class="w-5 h-5 text-blue-500"></i>
+    </div>
+    <h2 class="text-2xl font-black text-slate-900">誰に・どう届けるか</h2>
+  </div>
+
+  <div class="bg-ads-surface border border-ads-border rounded-2xl p-6">
+    <div class="flex flex-col md:flex-row items-center gap-4 mb-6">
+      <div class="flex flex-col items-center text-center p-3">
+        <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-2">
+          <i data-lucide="log-in" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div class="text-sm font-bold text-slate-900">ログイン</div>
+        <div class="text-[11px] text-ads-muted">メール or Google</div>
+      </div>
+      <i data-lucide="arrow-right" class="w-4 h-4 text-ads-dim hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-4 h-4 text-ads-dim md:hidden"></i>
+      <div class="flex flex-col items-center text-center p-3">
+        <div class="w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-2">
+          <i data-lucide="home" class="w-6 h-6 text-violet-600"></i>
+        </div>
+        <div class="text-sm font-bold text-slate-900">家庭を作る</div>
+        <div class="text-[11px] text-ads-muted">招待リンクで参加</div>
+      </div>
+      <i data-lucide="arrow-right" class="w-4 h-4 text-ads-dim hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-4 h-4 text-ads-dim md:hidden"></i>
+      <div class="flex flex-col items-center text-center p-3">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-2">
+          <i data-lucide="message-circle" class="w-6 h-6 text-emerald-600"></i>
+        </div>
+        <div class="text-sm font-bold text-slate-900">各自LINE連携</div>
+        <div class="text-[11px] text-ads-muted">自分宛に通知</div>
+      </div>
+    </div>
+    <p class="text-sm text-ads-muted leading-relaxed">
+      <span class="font-bold text-slate-800">設計は一般公開＋家族共有を前提</span>にしつつ、いまの利用は自分の家庭だけのクローズド利用です。
+      家庭の情報（定番・在庫・リマインド）はメンバー全員で共有します。
+    </p>
+  </div>
+</section>
+
+<!-- SECTION: 提出4欄に対応（図解内で触れる） -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+      <i data-lucide="clipboard-list" class="w-5 h-5 text-amber-600"></i>
+    </div>
+    <h2 class="text-2xl font-black text-slate-900">卒業制作として押さえたこと</h2>
+  </div>
+  <p class="mb-6 text-sm text-ads-muted">
+    提出の4つの観点を、この図解のなかでも触れています。
+  </p>
+
+  <div class="grid gap-4">
+    <div class="bg-white border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-[10px] font-bold text-ads-accent-light bg-ads-accent/10 rounded-full px-2 py-0.5">作ったもの</span>
+        <h3 class="font-bold text-slate-900 text-sm">完成した卒業制作の概要</h3>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed mb-2">
+        <span class="font-bold text-slate-800">AIキッチン秘書</span> — 「料理は自分で、管理はAIと一緒に」。
+        ホーム・献立・今ある・追加・設定の5画面で、朝夕の献立・在庫・追加・レシピ写真読取まで一通り触れるWebアプリ。
+      </p>
+      <p class="text-xs text-ads-dim break-all">
+        公開URL:
+        <a href="https://ai-kitchen-secretary.vercel.app" class="underline hover:text-ads-accent" target="_blank" rel="noopener">https://ai-kitchen-secretary.vercel.app</a>
+        （上の「完成のイメージ」に画面イメージあり）
+      </p>
+    </div>
+
+    <div class="bg-white border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-[10px] font-bold text-rose-600 bg-rose-500/10 rounded-full px-2 py-0.5">解決する面倒・課題</span>
+        <h3 class="font-bold text-slate-900 text-sm">どんな場面の面倒か</h3>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        余りや作り置きがあるのにまた買う、定番（おにぎり・卵サンドなど）なのに前日準備できない、献立・在庫・買い物が頭とメモに散らばる——
+        キッチンまわりの小さな摩擦と罪悪感（上記「企画の背景」「3つのモヤモヤ」）。
+      </p>
+    </div>
+
+    <div class="bg-white border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-[10px] font-bold text-violet-600 bg-violet-500/10 rounded-full px-2 py-0.5">作りたいと思った理由</span>
+        <h3 class="font-bold text-slate-900 text-sm">お題を選んだきっかけ</h3>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        自分の家庭でも起きる「あるのに買う」「定番なのに準備できない」が、特別な失敗ではなく日常の摩擦だと感じたから。
+        AIに料理を任せたいのではなく、自分で作る前提で、忘れる・散らかる部分だけ一緒に見てほしかった。
+        壁打ち（grill-me）で「代行ではなく伴走」「責めない」を軸に企画を固め、卒業制作の武器にした。
+      </p>
+    </div>
+
+    <div class="bg-white border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-500/10 rounded-full px-2 py-0.5">工夫・苦戦</span>
+        <h3 class="font-bold text-slate-900 text-sm">作ってみて気づいたこと</h3>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-3 text-sm text-ads-muted">
+        <div>
+          <p class="font-bold text-slate-800 text-xs mb-1.5">工夫したポイント</p>
+          <ul class="space-y-1.5 text-xs leading-relaxed">
+            <li>・AIの役割を伴走・提案・リマインドに絞った</li>
+            <li>・ホームは今日の朝夕がすぐ見える短さにした</li>
+            <li>・「家で作る」本線／実家（パス）・外食・調達は編集から</li>
+            <li>・相談と開発を分け、触れる完成度まで段階的に作り込んだ</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-bold text-slate-800 text-xs mb-1.5">苦戦したポイント</p>
+          <ul class="space-y-1.5 text-xs leading-relaxed">
+            <li>・やりたいことが多く、見せ場を絞る判断が必要だった</li>
+            <li>・「責めない」トーンを画面の言葉量に落とす調整が続いた</li>
+            <li>・土日夕の実家（パス）がデモやデザート表示に潰される不具合の切り分け</li>
+            <li>・レシピ読取はAPI制約があり、サンプル導線で見せ場を残した</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: まとめ -->
+<section class="mb-8">
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 rounded-xl bg-ads-accent/10 border border-ads-accent/20 flex items-center justify-center">
+      <i data-lucide="flag" class="w-5 h-5 text-ads-accent-light"></i>
+    </div>
+    <h2 class="text-2xl font-black text-slate-900">ひとことで言うと</h2>
+  </div>
+
+  <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border border-ads-accent/20 rounded-2xl p-6 md:p-8 text-center">
+    <p class="text-lg md:text-xl font-black text-slate-900 leading-relaxed mb-3">
+      忙しい家庭の「小さな罪悪感」を減らし、<br class="hidden sm:inline">
+      手作りの食卓を続けられるようにする。
+    </p>
+    <p class="text-sm text-ads-muted">
+      AIキッチン秘書は、料理を奪わない。<span class="font-bold text-ads-accent-light">管理だけを支える伴走パートナー</span>です。
+    </p>
+  </div>
+</section>
+
+<!-- CONTENT_END -->
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">AI-Driven School の図解ツールで作成</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

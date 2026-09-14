@@ -47,3 +47,17 @@ Cursorの利用上限をきっかけに、以下も同じリポジトリの別�
 - `backup/ai-kitchen-secretary`
 - `backup/personal-visual-explainers`
 - `backup/creating-visual-explainers`
+
+---
+
+## 作業ログ（セッション終了時に追記）
+
+「今日はここまでにします」のような一言があったら、その日やったこと・次回への申し送りを
+ここに1〜2行で追記していく。新しい日付のログを一番上に積む。
+
+### 2026-09-14
+
+- カーソルの利用上限をきっかけに、みらいPJ・AIキッチン秘書・personal/creating-visual-explainers を
+  すべてGitHubへバックアップ（下記ブランチ参照）
+- `docs/NEXT.md`（このファイル）を新設。以後、進捗の正本として使う
+- lintエラー2件を発見（`MiraiProgramTablePane.tsx`、`MiraiWorkspace.tsx`）。次回はここから着手
